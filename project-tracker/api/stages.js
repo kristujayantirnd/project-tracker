@@ -2,8 +2,44 @@ import { sql } from '@neondatabase/serverless';
 
 export default async function handler(req, res) {
   try {
-    const { projectId } = req.query;
+    const { projectId, feed } = req.query;
 
+    // Date-wise feed (Overdue, Due Today, Upcoming)
+    if (feed === 'true') {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const allStages = await sql`
+        SELECT ps.*, p.project_name 
+        FROM project_stages ps
+        JOIN projects p ON ps.project_id = p.project_id
+        WHERE ps.is_completed = FALSE
+        ORDER BY ps.calculated_due_date ASC
+      `;
+
+      const overdue = [];
+      const dueToday = [];
+      const upcoming = [];
+
+      allStages.forEach(s => {
+        const dateStr = s.calculated_due_date.toISOString().split('T')[0];
+        const item = {
+          id: s.id,
+          projectId: s.project_id,
+          projectName: s.project_name,
+          stageName: s.stage_name,
+          stageOrder: s.stage_order,
+          calculatedDueDate: dateStr,
+          remarks: s.remarks
+        };
+
+        if (dateStr < todayStr) overdue.push(item);
+        else if (dateStr === todayStr) dueToday.push(item);
+        else upcoming.push(item);
+      });
+
+      return res.status(200).json({ overdue, dueToday, upcoming });
+    }
+
+    // Project-wise stage fetch
     if (req.method === 'GET') {
       const stages = await sql`
         SELECT * FROM project_stages 
@@ -24,7 +60,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT') {
       const { id, isCompleted, remarks, calculatedDueDate } = req.body;
-      
+
       if (calculatedDueDate !== undefined) {
         await sql`UPDATE project_stages SET calculated_due_date = ${calculatedDueDate} WHERE id = ${id}`;
       } else {
