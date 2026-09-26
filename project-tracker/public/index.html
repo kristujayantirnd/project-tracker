@@ -2,88 +2,285 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Postgres Live Project Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL Live Project Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    .draggable-row { cursor: grab; }
-    .draggable-row:active { cursor: grabbing; }
-    .drag-over { border-top: 2px solid #3b82f6; }
+    body { font-family: 'Inter', sans-serif; }
+    .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
+    .draggable-row, .draggable-item { cursor: grab; }
+    .draggable-row:active, .draggable-item:active { cursor: grabbing; }
+    .drag-over { border-top: 2px solid #3b82f6; background-color: rgba(30, 41, 59, 0.8); }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col relative">
 
-  <header class="bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center">
-    <h1 class="font-bold text-lg text-white"><i class="fa-solid fa-bolt text-yellow-400 mr-2"></i>PostgreSQL Project Tracker</h1>
-    <button onclick="initApp()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg"><i class="fa-solid fa-rotate-right mr-1"></i>Refresh Data</button>
+  <!-- Loader Overlay -->
+  <div id="loader" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex-col items-center justify-center hidden">
+    <div class="w-12 h-12 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+    <p class="text-sm font-medium text-slate-300">Syncing with PostgreSQL Database...</p>
+  </div>
+
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center space-x-3">
+        <div class="p-2 bg-blue-600 rounded-lg text-white"><i class="fa-solid fa-bolt text-xl text-yellow-300"></i></div>
+        <div>
+          <h1 class="font-bold text-lg text-white tracking-wide">invincible YOU Project Tracker</h1>
+          <p class="text-xs text-slate-400">Powered by PostgreSQL & Vercel</p>
+        </div>
+      </div>
+      <button onclick="initApp()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh Data</button>
+    </div>
   </header>
 
-  <main class="max-w-7xl w-full mx-auto p-6 space-y-6">
-    <div class="flex gap-4">
-      <select id="project-select" onchange="renderProjectDashboard()" class="bg-slate-800 border border-slate-700 rounded p-2 text-sm text-white w-64"></select>
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Navigation Tabs -->
+    <div class="border-b border-slate-700 mb-6 flex space-x-8 overflow-x-auto" id="app-tabs">
+      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-active py-3 px-1 text-sm text-slate-300 hover:text-white flex items-center space-x-2">
+        <i class="fa-solid fa-chart-line"></i><span>Project Dashboard</span>
+      </button>
+      <button onclick="switchTab('presets')" id="tab-presets" class="py-3 px-1 text-sm text-slate-400 hover:text-white flex items-center space-x-2">
+        <i class="fa-solid fa-layer-group"></i><span>Preset Templates</span>
+      </button>
+      <button onclick="switchTab('create')" id="tab-create" class="py-3 px-1 text-sm text-slate-400 hover:text-white flex items-center space-x-2">
+        <i class="fa-solid fa-square-plus"></i><span>New Project</span>
+      </button>
     </div>
 
-    <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
-      <table class="w-full text-left">
-        <thead>
-          <tr class="bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-700">
-            <th class="p-3 w-8"></th>
-            <th class="p-3">Order</th>
-            <th class="p-3">Status</th>
-            <th class="p-3">Stage Name</th>
-            <th class="p-3">Due Date</th>
-            <th class="p-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="stages-table-body" class="divide-y divide-slate-700 text-sm"></tbody>
-      </table>
+    <!-- TAB 1: DASHBOARD -->
+    <div id="content-dashboard" class="tab-content space-y-6">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 w-full md:w-auto">
+          <button onclick="setDashboardView('project')" id="btn-view-project" class="px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow">Project-Wise</button>
+          <button onclick="setDashboardView('date')" id="btn-view-date" class="px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white">Date-Wise Agenda</button>
+        </div>
+        <div id="project-filter-container" class="w-full md:w-auto flex items-center space-x-3">
+          <label class="text-sm font-medium text-slate-300">Project:</label>
+          <select id="project-select" onchange="renderProjectDashboard()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none w-full md:w-64"></select>
+        </div>
+      </div>
+
+      <div id="view-project-wise" class="space-y-6">
+        <div id="project-card-header" class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-md">
+          <p class="text-slate-400 text-sm">Select a project to view details.</p>
+        </div>
+
+        <div id="add-stage-box" class="bg-slate-800 p-4 rounded-xl border border-slate-700 hidden">
+          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3"><i class="fa-solid fa-plus text-blue-400 mr-2"></i>Add Custom Stage to Project</h4>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input type="text" id="custom-stage-name" placeholder="Stage Name" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white">
+            <input type="date" id="custom-stage-date" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white">
+            <button onclick="handleAddCustomStage()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"><i class="fa-solid fa-plus mr-1"></i> Add Stage</button>
+          </div>
+        </div>
+
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900/50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700">
+                <th class="py-3 px-2 text-center w-8"></th>
+                <th class="py-3 px-4">Order</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4">Stage Name</th>
+                <th class="py-3 px-4">Due Date</th>
+                <th class="py-3 px-4">Remarks</th>
+                <th class="py-3 px-4 text-center">Done</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stages-table-body" class="divide-y divide-slate-700 text-sm text-slate-300"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="view-date-wise" class="hidden space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-slate-800 rounded-xl border border-red-500/30 p-4 shadow-lg">
+            <h3 class="font-bold text-red-400 mb-4 pb-2 border-b border-red-500/20"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Overdue</h3>
+            <div id="feed-overdue" class="space-y-3"></div>
+          </div>
+          <div class="bg-slate-800 rounded-xl border border-amber-500/30 p-4 shadow-lg">
+            <h3 class="font-bold text-amber-400 mb-4 pb-2 border-b border-amber-500/20"><i class="fa-solid fa-clock mr-2"></i> Due Today</h3>
+            <div id="feed-today" class="space-y-3"></div>
+          </div>
+          <div class="bg-slate-800 rounded-xl border border-blue-500/30 p-4 shadow-lg">
+            <h3 class="font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/20"><i class="fa-solid fa-calendar-days mr-2"></i> Upcoming</h3>
+            <div id="feed-upcoming" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PRESETS -->
+    <div id="content-presets" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-md h-fit">
+          <h3 id="preset-form-title" class="text-lg font-semibold text-white mb-4"><i class="fa-solid fa-plus-circle text-blue-400 mr-2"></i> Create Stage Preset</h3>
+          <form id="preset-form" onsubmit="handleSavePreset(event)" class="space-y-4">
+            <input type="hidden" id="editing-preset-id" value="">
+            <input type="text" id="preset-name" required placeholder="Preset Name (e.g. Website Launch)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
+            <div id="preset-stages-inputs" class="space-y-2"></div>
+            <div class="flex justify-between items-center pt-2">
+              <button type="button" onclick="addStageInputRow()" class="text-xs text-blue-400 hover:text-blue-300 font-medium"><i class="fa-solid fa-plus mr-1"></i> Add Stage</button>
+              <button type="button" id="btn-cancel-preset-edit" onclick="resetPresetForm()" class="text-xs text-slate-400 hover:text-white hidden">Cancel Edit</button>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition shadow"><i class="fa-solid fa-floppy-disk mr-2"></i> Save Preset to Postgres</button>
+          </form>
+        </div>
+        <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-md">
+          <h3 class="text-lg font-semibold text-white mb-4"><i class="fa-solid fa-database text-blue-400 mr-2"></i> Saved Presets</h3>
+          <div id="presets-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: CREATE PROJECT -->
+    <div id="content-create" class="tab-content hidden space-y-6">
+      <div class="max-w-2xl mx-auto bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-lg">
+        <h3 class="text-xl font-bold text-white mb-6"><i class="fa-solid fa-folder-plus text-blue-400 mr-2"></i> Create Live Project</h3>
+        <form id="create-project-form" onsubmit="handleCreateProject(event)" class="space-y-5">
+          <input type="text" id="new-project-name" required placeholder="Project Name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="date" id="new-project-start" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
+            <select id="new-project-preset" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none"></select>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition shadow-lg"><i class="fa-solid fa-rocket mr-2"></i> Generate Live Project</button>
+        </form>
+      </div>
     </div>
   </main>
 
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50">
+    <i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i><span id="toast-msg" class="text-sm">Action completed</span>
+  </div>
+
   <script>
-    let currentStages = [];
-    let dragIndex = null;
+    let globalProjects = [];
+    let globalPresets = [];
+    let currentDashboardView = 'project';
+    let currentProjectStages = [];
+    let stageDragIndex = null;
+    let dragSrcIndex = null;
+
+    function showLoader() { document.getElementById('loader').classList.replace('hidden', 'flex'); }
+    function hideLoader() { document.getElementById('loader').classList.replace('flex', 'hidden'); }
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 3000);
+    }
+
+    function switchTab(tabKey) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#app-tabs button').forEach(el => el.classList.remove('tab-active'));
+      document.getElementById('content-' + tabKey).classList.remove('hidden');
+      document.getElementById('tab-' + tabKey).classList.add('tab-active');
+      if(tabKey === 'dashboard') { initApp(); }
+    }
+
+    function setDashboardView(mode) {
+      currentDashboardView = mode;
+      document.getElementById('view-project-wise').classList.toggle('hidden', mode !== 'project');
+      document.getElementById('project-filter-container').classList.toggle('hidden', mode !== 'project');
+      document.getElementById('view-date-wise').classList.toggle('hidden', mode === 'project');
+      
+      document.getElementById('btn-view-project').className = mode === 'project' ? 'px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow' : 'px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white';
+      document.getElementById('btn-view-date').className = mode === 'date' ? 'px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow' : 'px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white';
+      
+      if(mode === 'date') loadDateWiseFeed();
+      else renderProjectDashboard();
+    }
 
     async function initApp() {
-      const res = await fetch('/api/projects');
-      const projects = await res.json();
-      const select = document.getElementById('project-select');
-      select.innerHTML = projects.map(p => `<option value="${p.projectId}">${p.projectName}</option>`).join('');
-      if (projects.length > 0) renderProjectDashboard();
+      showLoader();
+      try {
+        const pRes = await fetch('/api/presets');
+        globalPresets = await pRes.json();
+        renderPresetsList();
+
+        const presetSelect = document.getElementById('new-project-preset');
+        presetSelect.innerHTML = globalPresets.map(p => `<option value="${p.presetId}">${p.presetName}</option>`).join('');
+
+        const projRes = await fetch('/api/projects');
+        globalProjects = await projRes.json();
+
+        const projSelect = document.getElementById('project-select');
+        projSelect.innerHTML = globalProjects.length ? globalProjects.map(p => `<option value="${p.projectId}">${p.projectName}</option>`).join('') : '<option value="">No projects found</option>';
+
+        hideLoader();
+        if(globalProjects.length > 0 && currentDashboardView === 'project') renderProjectDashboard();
+      } catch (err) {
+        hideLoader();
+        console.error(err);
+      }
     }
 
     async function renderProjectDashboard() {
       const projId = document.getElementById('project-select').value;
-      if (!projId) return;
+      if (!projId) {
+        document.getElementById('add-stage-box').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('add-stage-box').classList.remove('hidden');
+      const project = globalProjects.find(p => p.projectId === projId);
+      showLoader();
 
       const res = await fetch(`/api/stages?projectId=${projId}`);
-      currentStages = await res.json();
+      currentProjectStages = await res.json();
+      hideLoader();
+
+      const completed = currentProjectStages.filter(s => s.isCompleted).length;
+      const pct = currentProjectStages.length ? Math.round((completed / currentProjectStages.length) * 100) : 0;
+
+      document.getElementById('project-card-header').innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 class="text-xl font-bold text-white">${project.projectName}</h2><p class="text-xs text-slate-400">ID: ${project.projectId}</p></div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Edit Start Date</label>
+            <input type="date" value="${project.startDate}" onchange="handleStartDateChange('${project.projectId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+          </div>
+        </div>
+        <div class="w-full bg-slate-900 rounded-full h-2 border border-slate-700"><div class="bg-blue-500 h-2 rounded-full" style="width: ${pct}%"></div></div>
+      `;
 
       const tbody = document.getElementById('stages-table-body');
-      tbody.innerHTML = currentStages.map((s, idx) => `
-        <tr draggable="true" data-index="${idx}" class="draggable-row hover:bg-slate-700/30">
-          <td class="p-3 text-slate-500"><i class="fa-solid fa-grip-vertical"></i></td>
-          <td class="p-3 font-mono text-xs text-slate-400">#${s.stageOrder}</td>
-          <td class="p-3">${s.isCompleted ? '<span class="text-emerald-400 font-bold">Done</span>' : '<span class="text-slate-400">Pending</span>'}</td>
-          <td class="p-3 font-semibold text-white">${s.stageName}</td>
-          <td class="p-3 font-mono text-xs"><input type="date" value="${s.calculatedDueDate}" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white"></td>
-          <td class="p-3 text-right">
-            <button onclick="deleteStage(${s.id})" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash-can"></i></button>
+      tbody.innerHTML = currentProjectStages.map((s, idx) => `
+        <tr draggable="true" data-index="${idx}" class="draggable-row hover:bg-slate-700/30 transition">
+          <td class="py-3 px-2 text-center text-slate-500"><i class="fa-solid fa-grip-vertical"></i></td>
+          <td class="py-3 px-4 font-mono text-xs text-slate-400">#${s.stageOrder}</td>
+          <td class="py-3 px-4">${s.isCompleted ? '<span class="text-emerald-400 text-xs font-bold">Done</span>' : '<span class="text-slate-400 text-xs font-bold">Pending</span>'}</td>
+          <td class="py-3 px-4 font-semibold text-white">${s.stageName}</td>
+          <td class="py-3 px-4 font-mono text-xs text-slate-300">
+            <input type="date" value="${s.calculatedDueDate}" onchange="handleCustomStageDateChange(${s.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+          </td>
+          <td class="py-3 px-4"><input type="text" value="${s.remarks || ''}" onchange="handleStageUpdate(${s.id}, ${s.isCompleted}, this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 w-full"></td>
+          <td class="py-3 px-4 text-center"><input type="checkbox" ${s.isCompleted ? 'checked' : ''} onchange="handleStageUpdate(${s.id}, this.checked, '${s.remarks || ''}')" class="w-4 h-4 text-blue-600 bg-slate-900 border-slate-700 rounded cursor-pointer"></td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="handleDeleteStage(${s.id})" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash-can"></i></button>
           </td>
         </tr>
       `).join('');
 
-      attachDragEvents();
+      attachTableDragAndDrop();
     }
 
-    function attachDragEvents() {
+    function attachTableDragAndDrop() {
       const rows = document.querySelectorAll('#stages-table-body tr');
       rows.forEach(row => {
         row.addEventListener('dragstart', (e) => {
-          dragIndex = parseInt(row.getAttribute('data-index'), 10);
+          stageDragIndex = parseInt(row.getAttribute('data-index'), 10);
           row.classList.add('opacity-50');
         });
-        row.addEventListener('dragend', () => row.classList.remove('opacity-50'));
+        row.addEventListener('dragend', () => {
+          row.classList.remove('opacity-50');
+          rows.forEach(r => r.classList.remove('drag-over'));
+        });
         row.addEventListener('dragover', (e) => { e.preventDefault(); row.classList.add('drag-over'); });
         row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
         row.addEventListener('drop', async (e) => {
@@ -91,39 +288,234 @@
           row.classList.remove('drag-over');
           const dropIndex = parseInt(row.getAttribute('data-index'), 10);
 
-          if (dragIndex !== null && dragIndex !== dropIndex) {
-            const reordered = [...currentStages];
-            const [moved] = reordered.splice(dragIndex, 1);
+          if (stageDragIndex !== null && stageDragIndex !== dropIndex) {
+            const reordered = [...currentProjectStages];
+            const [moved] = reordered.splice(stageDragIndex, 1);
             reordered.splice(dropIndex, 0, moved);
 
             const orderedIds = reordered.map(s => s.id);
-
-            // Optimistic UI update for instant feedback
-            currentStages = reordered;
+            currentProjectStages = reordered;
             renderProjectDashboard();
 
-            // Background async save to PostgreSQL database
             await fetch('/api/reorder-stages', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ orderedIds })
             });
+            showToast('Stages reordered!');
           }
         });
       });
     }
 
-    async function deleteStage(id) {
-      if (!confirm('Delete this stage?')) return;
+    async function handleCustomStageDateChange(id, newDate) {
+      showLoader();
+      await fetch('/api/stages', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, calculatedDueDate: newDate })
+      });
+      hideLoader();
+      showToast('Due date updated!');
+      renderProjectDashboard();
+    }
+
+    async function handleAddCustomStage() {
+      const projId = document.getElementById('project-select').value;
+      const stageName = document.getElementById('custom-stage-name').value;
+      const dueDate = document.getElementById('custom-stage-date').value;
+
+      if (!stageName || !dueDate) {
+        alert('Please fill stage name and due date.');
+        return;
+      }
+
+      showLoader();
+      await fetch('/api/stages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId: projId, stageName, dueDateStr: dueDate })
+      });
+      hideLoader();
+      showToast('Stage added!');
+      document.getElementById('custom-stage-name').value = '';
+      document.getElementById('custom-stage-date').value = '';
+      renderProjectDashboard();
+    }
+
+    async function handleDeleteStage(id) {
+      if (!confirm('Are you sure you want to delete this stage?')) return;
+      showLoader();
       await fetch('/api/stages', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
       });
+      hideLoader();
+      showToast('Stage deleted');
       renderProjectDashboard();
     }
 
-    window.onload = initApp;
+    async function handleStageUpdate(id, isCompleted, remarks) {
+      showLoader();
+      await fetch('/api/stages', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isCompleted, remarks })
+      });
+      hideLoader();
+      showToast('Stage updated!');
+      if(currentDashboardView === 'project') renderProjectDashboard();
+      else loadDateWiseFeed();
+    }
+
+    async function handleStartDateChange(projectId, newDate) {
+      showLoader();
+      await fetch('/api/projects', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, newStartDateStr: newDate })
+      });
+      hideLoader();
+      showToast('Start date updated & recalculated!');
+      initApp();
+    }
+
+    async function loadDateWiseFeed() {
+      showLoader();
+      const res = await fetch('/api/stages?feed=true');
+      const feed = await res.json();
+      hideLoader();
+
+      const renderCards = (arr) => arr.length ? arr.map(i => `
+        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 mb-2">
+          <span class="text-xs text-blue-400 block">${i.projectName}</span>
+          <div class="flex justify-between items-center"><h4 class="font-bold text-sm text-white">${i.stageName}</h4><span class="text-xs font-mono text-slate-400">${i.calculatedDueDate}</span></div>
+          <button onclick="handleStageUpdate(${i.id}, true, '${i.remarks || ''}')" class="text-xs text-emerald-400 hover:underline mt-2">Mark Complete</button>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-500">None</p>';
+
+      document.getElementById('feed-overdue').innerHTML = renderCards(feed.overdue);
+      document.getElementById('feed-today').innerHTML = renderCards(feed.dueToday);
+      document.getElementById('feed-upcoming').innerHTML = renderCards(feed.upcoming);
+    }
+
+    async function handleCreateProject(e) {
+      e.preventDefault();
+      showLoader();
+      const name = document.getElementById('new-project-name').value;
+      const date = document.getElementById('new-project-start').value;
+      const preset = document.getElementById('new-project-preset').value;
+
+      await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectName: name, startDateStr: date, presetId: preset })
+      });
+
+      hideLoader();
+      showToast('Project generated!');
+      e.target.reset();
+      switchTab('dashboard');
+    }
+
+    function addStageInputRow(name = '', offset = '') {
+      const container = document.getElementById('preset-stages-inputs');
+      const div = document.createElement('div');
+      div.className = 'flex items-center space-x-2 draggable-item p-1 bg-slate-900/50 rounded border border-slate-800';
+      div.draggable = true;
+
+      div.ondragstart = (e) => {
+        dragSrcIndex = Array.from(container.children).indexOf(div);
+      };
+      div.ondragover = (e) => { e.preventDefault(); };
+      div.ondrop = (e) => {
+        e.preventDefault();
+        const dropIndex = Array.from(container.children).indexOf(div);
+        if (dragSrcIndex !== null && dragSrcIndex !== dropIndex) {
+          const items = Array.from(container.children);
+          const draggedItem = items[dragSrcIndex];
+          if (dragSrcIndex < dropIndex) container.insertBefore(draggedItem, items[dropIndex].nextSibling);
+          else container.insertBefore(draggedItem, items[dropIndex]);
+        }
+      };
+
+      div.innerHTML = `
+        <i class="fa-solid fa-grip-vertical text-slate-600 px-1"></i>
+        <input type="text" placeholder="Stage Name" value="${name}" required class="p-stage-name flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+        <input type="number" placeholder="+Days" value="${offset}" required class="p-stage-offset w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 text-xs px-2"><i class="fa-solid fa-trash"></i></button>
+      `;
+      container.appendChild(div);
+    }
+
+    function editPreset(presetId) {
+      const preset = globalPresets.find(p => p.presetId === presetId);
+      if (!preset) return;
+
+      document.getElementById('preset-form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-400 mr-2"></i> Edit Master Preset`;
+      document.getElementById('editing-preset-id').value = preset.presetId;
+      document.getElementById('preset-name').value = preset.presetName;
+      document.getElementById('btn-cancel-preset-edit').classList.remove('hidden');
+
+      const container = document.getElementById('preset-stages-inputs');
+      container.innerHTML = '';
+      preset.stages.forEach(stg => {
+        addStageInputRow(stg.stageName, stg.daysOffset);
+      });
+    }
+
+    function resetPresetForm() {
+      document.getElementById('preset-form-title').innerHTML = `<i class="fa-solid fa-plus-circle text-blue-400 mr-2"></i> Create Stage Preset`;
+      document.getElementById('editing-preset-id').value = '';
+      document.getElementById('preset-name').value = '';
+      document.getElementById('preset-stages-inputs').innerHTML = '';
+      document.getElementById('btn-cancel-preset-edit').classList.add('hidden');
+      addStageInputRow();
+    }
+
+    async function handleSavePreset(e) {
+      e.preventDefault();
+      showLoader();
+      const name = document.getElementById('preset-name').value;
+      const presetId = document.getElementById('editing-preset-id').value || null;
+
+      const stages = Array.from(document.querySelectorAll('#preset-stages-inputs > div')).map((row, idx) => ({
+        stageName: row.querySelector('.p-stage-name').value,
+        stageOrder: idx + 1,
+        daysOffset: parseInt(row.querySelector('.p-stage-offset').value, 10)
+      }));
+
+      await fetch('/api/presets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ presetName: name, stages, existingPresetId: presetId })
+      });
+
+      hideLoader();
+      showToast('Preset saved!');
+      resetPresetForm();
+      initApp();
+    }
+
+    function renderPresetsList() {
+      document.getElementById('presets-list-container').innerHTML = globalPresets.length ? globalPresets.map(p => `
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
+          <div class="flex justify-between items-center">
+            <h4 class="font-bold text-white text-sm">${p.presetName}</h4>
+            <button onclick="editPreset('${p.presetId}')" class="text-xs bg-slate-800 hover:bg-slate-700 text-blue-400 px-2 py-1 rounded border border-slate-700"><i class="fa-solid fa-pen mr-1"></i>Edit Master</button>
+          </div>
+          <div class="space-y-1">${p.stages.map(s => `
+            <div class="flex justify-between text-xs text-slate-300 bg-slate-800 p-2 rounded">
+              <span>#${s.stageOrder}${s.stageName}</span>
+              <span class="text-blue-400">+${s.daysOffset}d</span>
+            </div>
+          `).join('')}</div>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-500">No presets saved yet.</p>';
+    }
+
+    window.onload = () => { addStageInputRow(); initApp(); };
   </script>
 </body>
 </html>
