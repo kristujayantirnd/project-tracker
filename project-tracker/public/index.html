@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Postgres Live Project Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .draggable-row { cursor: grab; }
+    .draggable-row:active { cursor: grabbing; }
+    .drag-over { border-top: 2px solid #3b82f6; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+  <header class="bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center">
+    <h1 class="font-bold text-lg text-white"><i class="fa-solid fa-bolt text-yellow-400 mr-2"></i>PostgreSQL Project Tracker</h1>
+    <button onclick="initApp()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg"><i class="fa-solid fa-rotate-right mr-1"></i>Refresh Data</button>
+  </header>
+
+  <main class="max-w-7xl w-full mx-auto p-6 space-y-6">
+    <div class="flex gap-4">
+      <select id="project-select" onchange="renderProjectDashboard()" class="bg-slate-800 border border-slate-700 rounded p-2 text-sm text-white w-64"></select>
+    </div>
+
+    <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-700">
+            <th class="p-3 w-8"></th>
+            <th class="p-3">Order</th>
+            <th class="p-3">Status</th>
+            <th class="p-3">Stage Name</th>
+            <th class="p-3">Due Date</th>
+            <th class="p-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="stages-table-body" class="divide-y divide-slate-700 text-sm"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    let currentStages = [];
+    let dragIndex = null;
+
+    async function initApp() {
+      const res = await fetch('/api/projects');
+      const projects = await res.json();
+      const select = document.getElementById('project-select');
+      select.innerHTML = projects.map(p => `<option value="${p.projectId}">${p.projectName}</option>`).join('');
+      if (projects.length > 0) renderProjectDashboard();
+    }
+
+    async function renderProjectDashboard() {
+      const projId = document.getElementById('project-select').value;
+      if (!projId) return;
+
+      const res = await fetch(`/api/stages?projectId=${projId}`);
+      currentStages = await res.json();
+
+      const tbody = document.getElementById('stages-table-body');
+      tbody.innerHTML = currentStages.map((s, idx) => `
+        <tr draggable="true" data-index="${idx}" class="draggable-row hover:bg-slate-700/30">
+          <td class="p-3 text-slate-500"><i class="fa-solid fa-grip-vertical"></i></td>
+          <td class="p-3 font-mono text-xs text-slate-400">#${s.stageOrder}</td>
+          <td class="p-3">${s.isCompleted ? '<span class="text-emerald-400 font-bold">Done</span>' : '<span class="text-slate-400">Pending</span>'}</td>
+          <td class="p-3 font-semibold text-white">${s.stageName}</td>
+          <td class="p-3 font-mono text-xs"><input type="date" value="${s.calculatedDueDate}" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white"></td>
+          <td class="p-3 text-right">
+            <button onclick="deleteStage(${s.id})" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash-can"></i></button>
+          </td>
+        </tr>
+      `).join('');
+
+      attachDragEvents();
+    }
+
+    function attachDragEvents() {
+      const rows = document.querySelectorAll('#stages-table-body tr');
+      rows.forEach(row => {
+        row.addEventListener('dragstart', (e) => {
+          dragIndex = parseInt(row.getAttribute('data-index'), 10);
+          row.classList.add('opacity-50');
+        });
+        row.addEventListener('dragend', () => row.classList.remove('opacity-50'));
+        row.addEventListener('dragover', (e) => { e.preventDefault(); row.classList.add('drag-over'); });
+        row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+        row.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          row.classList.remove('drag-over');
+          const dropIndex = parseInt(row.getAttribute('data-index'), 10);
+
+          if (dragIndex !== null && dragIndex !== dropIndex) {
+            const reordered = [...currentStages];
+            const [moved] = reordered.splice(dragIndex, 1);
+            reordered.splice(dropIndex, 0, moved);
+
+            const orderedIds = reordered.map(s => s.id);
+
+            // Optimistic UI update for instant feedback
+            currentStages = reordered;
+            renderProjectDashboard();
+
+            // Background async save to PostgreSQL database
+            await fetch('/api/reorder-stages', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderedIds })
+            });
+          }
+        });
+      });
+    }
+
+    async function deleteStage(id) {
+      if (!confirm('Delete this stage?')) return;
+      await fetch('/api/stages', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      renderProjectDashboard();
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
