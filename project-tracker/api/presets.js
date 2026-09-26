@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json(result);
     } 
-    
+
     if (req.method === 'POST') {
       const { presetName, stages, existingPresetId } = req.body;
       const presetId = existingPresetId || `PRST_${Math.random().toString(36).substring(2, 10)}`;
