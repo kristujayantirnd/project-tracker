@@ -22,7 +22,6 @@ export default async function handler(req, res) {
         VALUES (${projectId}, ${projectName}, ${startDateStr}, ${presetId}, 'Active')
       `;
 
-      // Copy preset stages into project stages
       const presetStages = await sql`SELECT * FROM preset_stages WHERE preset_id = ${presetId} ORDER BY stage_order ASC`;
       const baseDate = new Date(startDateStr);
 
@@ -38,6 +37,32 @@ export default async function handler(req, res) {
       }
 
       return res.status(200).json({ success: true, projectId });
+    }
+
+    if (req.method === 'PUT') {
+      const { projectId, newStartDateStr } = req.body;
+      await sql`UPDATE projects SET start_date = ${newStartDateStr} WHERE project_id = ${projectId}`;
+
+      // Recalculate project stage dates based on preset offsets
+      const proj = await sql`SELECT * FROM projects WHERE project_id = ${projectId}`;
+      if (proj.length > 0 && proj[0].preset_id) {
+        const presetStages = await sql`SELECT * FROM preset_stages WHERE preset_id = ${proj[0].preset_id}`;
+        const baseDate = new Date(newStartDateStr);
+
+        for (const stg of presetStages) {
+          const calcDueDate = new Date(baseDate);
+          calcDueDate.setDate(calcDueDate.getDate() + stg.days_offset);
+          const dueDateStr = calcDueDate.toISOString().split('T')[0];
+
+          await sql`
+            UPDATE project_stages 
+            SET calculated_due_date = ${dueDateStr} 
+            WHERE project_id = ${projectId} AND stage_order = ${stg.stage_order}
+          `;
+        }
+      }
+
+      return res.status(200).json({ success: true });
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });
