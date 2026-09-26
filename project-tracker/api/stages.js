@@ -1,10 +1,10 @@
-import { sql } from '@neondatabase/serverless';
+import { neon } from '@neondatabase/serverless';
 
 export default async function handler(req, res) {
   try {
+    const sql = neon(process.env.POSTGRES_URL || process.env.DATABASE_URL);
     const { projectId, feed } = req.query;
 
-    // Date-wise feed (Overdue, Due Today, Upcoming)
     if (feed === 'true') {
       const todayStr = new Date().toISOString().split('T')[0];
       const allStages = await sql`
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       const upcoming = [];
 
       allStages.forEach(s => {
-        const dateStr = s.calculated_due_date.toISOString().split('T')[0];
+        const dateStr = new Date(s.calculated_due_date).toISOString().split('T')[0];
         const item = {
           id: s.id,
           projectId: s.project_id,
@@ -39,7 +39,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ overdue, dueToday, upcoming });
     }
 
-    // Project-wise stage fetch
     if (req.method === 'GET') {
       const stages = await sql`
         SELECT * FROM project_stages 
@@ -52,14 +51,19 @@ export default async function handler(req, res) {
         projectId: s.project_id,
         stageName: s.stage_name,
         stageOrder: s.stage_order,
-        calculatedDueDate: s.calculated_due_date.toISOString().split('T')[0],
+        calculatedDueDate: new Date(s.calculated_due_date).toISOString().split('T')[0],
         isCompleted: s.is_completed,
         remarks: s.remarks
       })));
     }
 
     if (req.method === 'PUT') {
-      const { id, isCompleted, remarks, calculatedDueDate } = req.body;
+      let body = req.body;
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch(e) {}
+      }
+
+      const { id, isCompleted, remarks, calculatedDueDate } = body || {};
 
       if (calculatedDueDate !== undefined) {
         await sql`UPDATE project_stages SET calculated_due_date = ${calculatedDueDate} WHERE id = ${id}`;
@@ -70,7 +74,12 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { projectId, stageName, dueDateStr } = req.body;
+      let body = req.body;
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch(e) {}
+      }
+
+      const { projectId, stageName, dueDateStr } = body || {};
       const countRes = await sql`SELECT COUNT(*) FROM project_stages WHERE project_id = ${projectId}`;
       const nextOrder = parseInt(countRes[0].count, 10) + 1;
 
@@ -82,11 +91,17 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
-      const { id } = req.body;
+      let body = req.body;
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch(e) {}
+      }
+
+      const { id } = body || {};
       await sql`DELETE FROM project_stages WHERE id = ${id}`;
       return res.status(200).json({ success: true });
     }
   } catch (error) {
+    console.error('Stages API Error:', error);
     return res.status(500).json({ error: error.message });
   }
 }
