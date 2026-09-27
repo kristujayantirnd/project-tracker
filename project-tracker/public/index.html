@@ -95,8 +95,8 @@
         </span>
         <span class="hidden sm:block w-px h-10 bg-slate-300 shrink-0"></span>
         <span class="min-w-0 hidden sm:block">
-          <h1 class="font-semibold text-[15px] text-slate-800 tracking-tight truncate">Project Tracker</h1>
-          <p class="text-xs text-slate-500 truncate">Let's stay organised</p>
+          <h1 class="font-semibold text-[15px] text-white tracking-tight truncate">Project Tracker</h1>
+          <p class="text-xs text-slate-200 truncate">Let's stay organised</p>
         </span>
       </a>
 
@@ -264,22 +264,6 @@
   </div>
 
   <script>
-    /* The Invincible YOU logo, served by the website's image optimiser.
-       w=3840 is the full-size render; dropping it to w=640 loads far less for
-       a 28px-tall header mark. If this ever fails, the text wordmark in the
-       header takes its place. 
-    const ORG_LOGO_SRC = 'https://invincibleyou.world/_next/image?url=%2Flogo2.png&w=3840&q=75';
-
-    function showLogoFallback() {
-      document.getElementById('org-logo').classList.add('hidden');
-      document.getElementById('org-logo-fallback').classList.remove('hidden');
-    }
-    function loadOrgLogo() {
-      const img = document.getElementById('org-logo');
-      if (!ORG_LOGO_SRC) { showLogoFallback(); return; }
-      img.src = ORG_LOGO_SRC;
-    }*/
-
     let globalProjects = [];
     let globalPresets = [];
     let currentDashboardView = 'project';
@@ -335,6 +319,11 @@
 
         hideLoader();
         if (globalProjects.length > 0 && currentDashboardView === 'project') renderProjectDashboard();
+        else if (globalProjects.length === 0) {
+          document.getElementById('project-card-header').innerHTML = '<p class="text-slate-400 text-sm">No projects found. Create one using the "New Project" tab.</p>';
+          document.getElementById('stages-table-body').innerHTML = '';
+          document.getElementById('add-stage-box').classList.add('hidden');
+        }
       } catch (err) {
         hideLoader();
         console.error(err);
@@ -350,6 +339,8 @@
 
       document.getElementById('add-stage-box').classList.remove('hidden');
       const project = globalProjects.find(p => p.projectId === projId);
+      if (!project) return;
+      
       showLoader();
 
       const res = await fetch(`/api/stages?projectId=${projId}`);
@@ -359,9 +350,21 @@
       const completed = currentProjectStages.filter(s => s.isCompleted).length;
       const pct = currentProjectStages.length ? Math.round((completed / currentProjectStages.length) * 100) : 0;
 
+      // Header updated with Edit and Delete actions
       document.getElementById('project-card-header').innerHTML = `
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
-          <div><h2 class="text-xl font-bold text-white">${project.projectName}</h2><p class="text-xs text-slate-400 num">ID: ${project.projectId}</p></div>
+          <div>
+            <div class="flex items-center gap-3">
+              <h2 class="text-xl font-bold text-white">${project.projectName}</h2>
+              <button onclick="handleEditProject('${project.projectId}', '${project.projectName.replace(/'/g, "\\'")}')" class="text-xs bg-slate-900 hover:bg-slate-700 text-blue-300 border border-slate-700 px-2 py-1 rounded transition" title="Edit Name">
+                <i class="fa-solid fa-pen mr-1"></i> Edit
+              </button>
+              <button onclick="handleDeleteProject('${project.projectId}', '${project.projectName.replace(/'/g, "\\'")}')" class="text-xs bg-slate-900 hover:bg-red-900/50 text-red-400 border border-slate-700 hover:border-red-500/50 px-2 py-1 rounded transition" title="Delete Project">
+                <i class="fa-solid fa-trash-can mr-1"></i> Delete
+              </button>
+            </div>
+            <p class="text-xs text-slate-400 num mt-1">ID: ${project.projectId}</p>
+          </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">Edit Start Date</label>
             <input type="date" value="${project.startDate}" onchange="handleStartDateChange('${project.projectId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white num">
@@ -392,6 +395,60 @@
       `).join('');
 
       attachTableDragAndDrop();
+    }
+
+    // Action Handler: Edit Project Name
+    async function handleEditProject(projectId, currentName) {
+      const newName = prompt('Edit project name:', currentName);
+      if (newName === null || newName.trim() === '' || newName.trim() === currentName) return;
+
+      showLoader();
+      try {
+        const res = await fetch('/api/projects', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId, projectName: newName.trim() })
+        });
+
+        if (res.ok) {
+          showToast('Project updated!');
+          initApp();
+        } else {
+          const err = await res.json();
+          alert(`Error: ${err.error || 'Failed to update project'}`);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error updating project.');
+      } finally {
+        hideLoader();
+      }
+    }
+
+    // Action Handler: Delete Project with Confirmation Prompt
+    async function handleDeleteProject(projectId, projectName) {
+      const confirmed = confirm(`Are you sure you want to delete "${projectName}"?\n\nThis will permanently delete this project and all its stages.`);
+      if (!confirmed) return;
+
+      showLoader();
+      try {
+        const res = await fetch(`/api/projects?projectId=${projectId}`, {
+          method: 'DELETE'
+        });
+
+        if (res.ok) {
+          showToast('Project deleted successfully!');
+          initApp();
+        } else {
+          const err = await res.json();
+          alert(`Error: ${err.error || 'Failed to delete project'}`);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error deleting project.');
+      } finally {
+        hideLoader();
+      }
     }
 
     function attachTableDragAndDrop() {
@@ -631,7 +688,7 @@
           </div>
           <div class="space-y-1">${p.stages.map(s => `
             <div class="flex justify-between gap-2 text-xs text-slate-300 bg-slate-800 p-2 rounded">
-              <span><span class="num text-slate-500">#${s.stageOrder}</span> ${s.stageName}</span>
+              <span><span class="num text-slate-500">#${s.stageOrder}</span>${s.stageName}</span>
               <span class="text-blue-300 num shrink-0">+${s.daysOffset}d</span>
             </div>
           `).join('')}</div>

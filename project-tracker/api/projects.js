@@ -1,82 +1,70 @@
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@neondatabase/serverless';
 
 export default async function handler(req, res) {
   try {
-    const sql = neon(process.env.POSTGRES_URL || process.env.DATABASE_URL);
-
+    // GET: Fetch all projects
     if (req.method === 'GET') {
-      const projects = await sql`SELECT * FROM projects ORDER BY created_at DESC`;
-      return res.status(200).json(projects.map(p => ({
-        projectId: p.project_id,
-        projectName: p.project_name,
-        startDate: new Date(p.start_date).toISOString().split('T')[0],
-        presetId: p.preset_id,
-        status: p.status
-      })));
+      const projects = await sql`SELECT * FROM projects ORDER BY id DESC;`;
+      return res.status(200).json(projects);
     }
 
+    // POST: Create a new project
     if (req.method === 'POST') {
-      let body = req.body;
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch(e) {}
+      const { name, stage } = req.body;
+      const result = await sql`
+        INSERT INTO projects (name, stage) 
+        VALUES (${name}, ${stage}) 
+        RETURNING *;
+      `;
+      return res.status(201).json(result[0]);
+    }
+
+    // PUT: Update/Edit an existing project
+    if (req.method === 'PUT') {
+      const { id, name, stage } = req.body;
+      
+      if (!id || !name) {
+        return res.status(400).json({ error: 'Project ID and name are required' });
       }
 
-      const { projectName, startDateStr, presetId } = body || {};
-      const projectId = `PRJ_${Math.random().toString(36).substring(2, 10)}`;
-
-      await sql`
-        INSERT INTO projects (project_id, project_name, start_date, preset_id, status)
-        VALUES (${projectId}, ${projectName}, ${startDateStr}, ${presetId}, 'Active')
+      const result = await sql`
+        UPDATE projects 
+        SET name = ${name}, stage = ${stage} 
+        WHERE id = ${id} 
+        RETURNING *;
       `;
 
-      const presetStages = await sql`SELECT * FROM preset_stages WHERE preset_id = ${presetId} ORDER BY stage_order ASC`;
-      const baseDate = new Date(startDateStr);
-
-      for (const stg of presetStages) {
-        const calcDueDate = new Date(baseDate);
-        calcDueDate.setDate(calcDueDate.getDate() + stg.days_offset);
-        const dueDateStr = calcDueDate.toISOString().split('T')[0];
-
-        await sql`
-          INSERT INTO project_stages (project_id, stage_name, stage_order, calculated_due_date, is_completed, remarks)
-          VALUES (${projectId}, ${stg.stage_name}, ${stg.stage_order}, ${dueDateStr}, FALSE, '')
-        `;
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Project not found' });
       }
 
-      return res.status(200).json({ success: true, projectId });
+      return res.status(200).json(result[0]);
     }
 
-    if (req.method === 'PUT') {
-      let body = req.body;
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch(e) {}
+    // DELETE: Remove a project by ID
+    if (req.method === 'DELETE') {
+      const { id } = req.query;
+
+      if (!id) {
+        return res.status(400).json({ error: 'Project ID is required' });
       }
 
-      const { projectId, newStartDateStr } = body || {};
-      await sql`UPDATE projects SET start_date = ${newStartDateStr} WHERE project_id = ${projectId}`;
+      const result = await sql`
+        DELETE FROM projects 
+        WHERE id = ${id} 
+        RETURNING id;
+      `;
 
-      const proj = await sql`SELECT * FROM projects WHERE project_id = ${projectId}`;
-      if (proj.length > 0 && proj[0].preset_id) {
-        const presetStages = await sql`SELECT * FROM preset_stages WHERE preset_id = ${proj[0].preset_id}`;
-        const baseDate = new Date(newStartDateStr);
-
-        for (const stg of presetStages) {
-          const calcDueDate = new Date(baseDate);
-          calcDueDate.setDate(calcDueDate.getDate() + stg.days_offset);
-          const dueDateStr = calcDueDate.toISOString().split('T')[0];
-
-          await sql`
-            UPDATE project_stages 
-            SET calculated_due_date = ${dueDateStr} 
-            WHERE project_id = ${projectId} AND stage_order = ${stg.stage_order}
-          `;
-        }
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Project not found' });
       }
 
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ message: 'Project deleted successfully', id });
     }
+
+    return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('Projects API Error:', error);
+    console.error('Database error:', error);
     return res.status(500).json({ error: error.message });
   }
 }
