@@ -1,50 +1,50 @@
 :root {
-  /* Brand Palette (Crisp Corporate Blues) */
-  --brand-300: #93C5FD;
-  --brand-400: #60A5FA;
-  --brand-500: #3B82F6;
-  --brand-600: #2563EB;
-  --brand-700: #1D4ED8;
-  --brand-800: #1E40AF;
-  --brand-900: #1E3A8A;
+  /* Brand Palette (Teal/Mint and Deep Navy accents from the dashboard theme) */
+  --brand-300: #5EEAD4;
+  --brand-400: #2DD4BF;
+  --brand-500: #14B8A6;
+  --brand-600: #0D9488;
+  --brand-700: #0F766E;
+  --brand-800: #1E293B;
+  --brand-900: #0F172A;
   
-  /* Neutral Light Mode Palette */
+  /* Neutral Dashboard Light Mode Palette */
   --slate-50:  #FFFFFF;
   --slate-100: #F8FAFC;
   --slate-200: #E2E8F0;
   --slate-300: #CBD5E1;
-  --slate-400: #475569; 
-  --slate-500: #334155; 
-  --slate-600: #1E293B; 
-  --slate-700: #0F172A; 
-  --slate-800: #FFFFFF; /* Content cards remain white */
-  --slate-900: #F1F5F9; /* Page background */
-  --slate-950: #64748B;
+  --slate-400: #64748B; /* Clear secondary text */
+  --slate-500: #475569; 
+  --slate-600: #334155; /* Sharp body text */
+  --slate-700: #1E293B; /* Distinct borders */
+  --slate-800: #FFFFFF; /* White card containers */
+  --slate-900: #F1F5F9; /* Clean light background matching dashboard mockups */
+  --slate-950: #0F172A;
 
-  --bg-gradient-1: rgba(37, 99, 235, 0.12);
-  --bg-gradient-2: rgba(59, 130, 246, 0.05);
-  --logo-shadow-base: rgba(37, 99, 235, 0.25);
-  --logo-shadow-hover: rgba(59, 130, 246, 0.4);
-  --selection-bg: rgba(59, 130, 246, 0.2);
+  --bg-gradient-1: rgba(13, 148, 136, 0.12);
+  --bg-gradient-2: rgba(20, 184, 166, 0.05);
+  --logo-shadow-base: rgba(15, 23, 42, 0.25);
+  --logo-shadow-hover: rgba(13, 148, 136, 0.4);
+  --selection-bg: rgba(20, 184, 166, 0.2);
 }
 
-/* Force the top navigation header to be a deep corporate blue with white text */
+/* Custom styling for the top header to match the dark dashboard banner */
 header.bg-slate-800\/90 {
-  background-color: #1E3A8A !important; /* Deep Navy Blue */
-  border-bottom-color: #1D4ED8 !important;
+  background-color: #1E293B !important; /* Deep Dark Slate/Navy Header */
+  border-bottom-color: #334155 !important;
 }
 
 header h1, header p, header .text-slate-100, header .text-slate-400 {
-  color: #FFFFFF !important; /* Ensures header text is stark white and readable */
+  color: #FFFFFF !important; /* Stark white text inside the dark header */
 }
 
 header .bg-slate-700 {
-  background-color: #3B82F6 !important; /* Divider lines */
+  background-color: #475569 !important;
 }
 
 header button {
-  background-color: #1E40AF !important;
-  border-color: #3B82F6 !important;
+  background-color: #334155 !important;
+  border-color: #475569 !important;
   color: #FFFFFF !important;
 }
 
@@ -54,7 +54,7 @@ header button {
   background-position: left center;
   background-repeat: no-repeat;
   
-  height: 32px;
-  width: 175px; 
+  height: 60px;
+  width: 250px; 
   display: block;
 }
