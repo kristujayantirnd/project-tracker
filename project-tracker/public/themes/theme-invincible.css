@@ -1,0 +1,30 @@
+:root {
+  /* Brand Palette (Replaces Tailwind 'blue') */
+  --brand-300: #E0B6F2;
+  --brand-400: #C98BE4;
+  --brand-500: #A040C4;
+  --brand-600: #680087;
+  --brand-700: #811AA3;
+  --brand-800: #4F0068;
+  --brand-900: #36004A;
+  
+  /* Neutral Palette (Replaces Tailwind 'slate') */
+  --slate-50:  #FAF7FC;
+  --slate-100: #F4EFF7;
+  --slate-200: #E3D9EA;
+  --slate-300: #C7B6D3;
+  --slate-400: #A18CB0;
+  --slate-500: #7B6689;
+  --slate-600: #4A3659;
+  --slate-700: #382848;
+  --slate-800: #221533;
+  --slate-900: #170D22;
+  --slate-950: #0D0715;
+
+  /* Custom Gradient & Shadow Variables */
+  --bg-gradient-1: rgba(104, 0, 135, 0.38);
+  --bg-gradient-2: rgba(160, 64, 196, 0.16);
+  --logo-shadow-base: rgba(104, 0, 135, 0.95);
+  --logo-shadow-hover: rgba(160, 64, 196, 0.85);
+  --selection-bg: rgba(160, 64, 196, 0.45);
+}
