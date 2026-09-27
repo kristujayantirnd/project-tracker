@@ -235,7 +235,7 @@
     /* The Invincible YOU logo, served by the website's image optimiser.
        w=3840 is the full-size render; dropping it to w=640 loads far less for
        a 28px-tall header mark. If this ever fails, the text wordmark in the
-       header takes its place. */
+       header takes its place. 
     const ORG_LOGO_SRC = 'https://invincibleyou.world/_next/image?url=%2Flogo2.png&w=3840&q=75';
 
     function showLogoFallback() {
@@ -246,7 +246,7 @@
       const img = document.getElementById('org-logo');
       if (!ORG_LOGO_SRC) { showLogoFallback(); return; }
       img.src = ORG_LOGO_SRC;
-    }
+    }*/
 
     let globalProjects = [];
     let globalPresets = [];
@@ -607,7 +607,7 @@
       `).join('') : '<p class="text-xs text-slate-500">No presets saved yet.</p>';
     }
 
-    window.onload = () => { loadOrgLogo(); addStageInputRow(); initApp(); };
+    window.onload = () => { addStageInputRow(); initApp(); };
   </script>
 </body>
 </html>

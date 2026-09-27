@@ -28,3 +28,14 @@
   --logo-shadow-hover: rgba(160, 64, 196, 0.85);
   --selection-bg: rgba(160, 64, 196, 0.45);
 }
+
+.theme-logo {
+  /* This pulls the image directly from the CSS */
+  content: url('https://invincibleyou.world/_next/image?url=%2Flogo2.png&w=640&q=75');
+  
+  /* This locks the height and automatically scales the width to match */
+  height: 28px;
+  max-width: 190px;
+  display: block;
+  object-fit: contain;
+}
