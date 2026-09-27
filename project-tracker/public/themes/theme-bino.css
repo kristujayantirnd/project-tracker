@@ -1,188 +1,528 @@
+/* ============================================================
+   Project Tracker — dark theme
+   Kristu Jayanti University
+
+   Load this AFTER Tailwind. Order matters: the remap section
+   ties specificity with Tailwind's utilities and wins on order,
+   which is why there is almost no !important in this file.
+
+     <link rel="stylesheet" href="/tracker-dark.css">
+
+   Fonts (optional but recommended — the @import at the top of
+   this file works, a <link> in <head> is faster):
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+
+/* ── 1. Tokens ─────────────────────────────────────────────── */
+
 :root {
-  /* ---- Brand ---- */
-  --brand-300: #5EEAD4;
-  --brand-400: #2DD4BF;
-  --brand-500: #14B8A6;
-  --brand-600: #0D9488;
-  --brand-700: #0F766E;
+  /* Surfaces — desaturated navy, not tinted black.
+     Three steps only: page, card, raised. More steps than that
+     and nothing reads as foreground. */
+  --bg-page:    #101720;
+  --bg-card:    #18212C;
+  --bg-raised:  #212C3A;
+  --bg-input:   #0C1218;   /* inputs sit *below* the card, not above */
 
-  /* ---- Surfaces (renamed to say what they ARE, not a scale position) ---- */
-  --surface-page:   #F1F5F9;
-  --surface-card:   #FFFFFF;
-  --surface-sunken: #F8FAFC;
-  --surface-dark:   #1E293B;   /* header banner */
-  --border-subtle:  #E2E8F0;
-  --border-strong:  #CBD5E1;
+  --line:       #2A3746;   /* default border */
+  --line-soft:  #212C3A;   /* table row dividers */
+  --line-loud:  #3B4C60;   /* input borders, needs to be findable */
 
-  /* ---- Text on light surfaces (ratio vs #FFFFFF) ---- */
-  --text-strong: #0F172A;  /* 17.9:1 — headings */
-  --text-body:   #334155;  /* 10.5:1 — paragraphs */
-  --text-muted:  #475569;  /*  7.6:1 — captions, labels */
-  --text-faint:  #64748B;  /*  4.8:1 — timestamps ONLY, never body */
-  --text-link:   #0F766E;  /*  5.5:1 — brand-600 is only 3.7:1, too weak for links */
+  /* Text — ratios against --bg-card (#18212C) */
+  --ink:        #E6EDF5;   /* 13.2:1  headings, values */
+  --ink-body:   #C3D0DE;   /*  9.5:1  body */
+  --ink-muted:  #94A7BB;   /*  5.8:1  labels, captions */
+  --ink-faint:  #6F8299;   /*  3.4:1  decorative only — never text */
 
-  /* ---- Text on the dark header (ratio vs #1E293B) ---- */
-  --on-dark-strong: #FFFFFF;  /* 14.2:1 */
-  --on-dark-muted:  #CBD5E1;  /*  9.6:1 — keeps hierarchy instead of flattening to white */
-  --on-dark-accent: #5EEAD4;  /*  9.6:1 — safe teal on dark */
+  /* Brand */
+  --teal:       #2DD4BF;
+  --teal-bright:#5EEAD4;
+  --teal-deep:  #0F766E;
+  --teal-wash:  rgba(45, 212, 191, 0.12);
 
-  /* ---- Type ---- */
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --leading-tight: 1.25;
-  --leading-body:  1.65;
-  --measure: 68ch;
+  /* Status — these carry information, so each hue is distinct.
+     Teal means finished, which is why the progress bar is teal. */
+  --st-pending:  #8FA3B8;
+  --st-active:   #F0B429;
+  --st-done:     #2DD4BF;
+  --st-overdue:  #FB7185;
 
-  --selection-bg: rgba(20, 184, 166, 0.28);
+  /* Type */
+  --font: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-id: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+
+  --shell: 1180px;
+
+  /* Tells the browser to render native date pickers, selects,
+     checkboxes and scrollbars dark. Without this line the date
+     fields stay white-on-white — that was half the problem. */
+  color-scheme: dark;
 }
 
-/* ---- Base rendering ---- */
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
+
+/* ── 2. Base ───────────────────────────────────────────────── */
+
+* { border-color: var(--line); }
+
+html { -webkit-text-size-adjust: 100%; }
 
 body {
-  font-family: var(--font-sans);
-  font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
-  line-height: var(--leading-body);
-  color: var(--text-body);
-  background-color: var(--surface-page);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-body);
+  background: var(--bg-page);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4 {
-  color: var(--text-strong);
-  line-height: var(--leading-tight);
-  letter-spacing: -0.015em;   /* large text needs tightening, small text does not */
-  text-wrap: balance;
-  font-weight: 650;
-}
-
-p, li {
-  max-width: var(--measure);  /* the single biggest readability win */
-  text-wrap: pretty;
-}
-
-small, .caption, .text-muted {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-/* Uppercase labels need extra tracking or they turn into a wall */
-.label, .eyebrow, [class*="uppercase"] {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.014em;
   font-weight: 600;
-  color: var(--text-muted);
+  text-wrap: balance;
 }
 
-/* Dashboard numerics stop jittering between refreshes */
-.metric, .stat, td[data-numeric], .tabular {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
+p { max-width: 70ch; text-wrap: pretty; }
 
-a {
-  color: var(--text-link);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
-}
-a:hover { color: var(--brand-700); }
+hr { border: 0; border-top: 1px solid var(--line); }
 
-::selection {
-  background-color: var(--selection-bg);
-  color: var(--text-strong);
+/* THE SELECTION FIX.
+   A saturated block over every line is what made the page
+   unreadable. Low-alpha tint, forced readable foreground,
+   no text-shadow bleeding through. */
+::selection      { background: rgba(45, 212, 191, 0.30); color: #FFFFFF; text-shadow: none; }
+::-moz-selection { background: rgba(45, 212, 191, 0.30); color: #FFFFFF; text-shadow: none; }
+
+/* Selection inside inputs needs its own rule or it inherits
+   the page value and disappears against the darker field. */
+input::selection, textarea::selection, select::selection {
+  background: rgba(94, 234, 212, 0.35);
+  color: #FFFFFF;
 }
 
 :focus-visible {
-  outline: 2px solid var(--brand-600);
+  outline: 2px solid var(--teal-bright);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--r-sm);
 }
 
-/* ---- Dark header banner ---- */
-/* Prefer adding class="app-header" in the markup; the escaped Tailwind
-   selector is kept as a fallback so this drops in without edits. */
-.app-header,
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: var(--bg-page); }
+::-webkit-scrollbar-thumb {
+  background: var(--line-loud);
+  border-radius: 99px;
+  border: 3px solid var(--bg-page);
+}
+::-webkit-scrollbar-thumb:hover { background: #4E6480; }
+
+
+/* ── 3. Tailwind remap ─────────────────────────────────────── */
+/* Your markup keeps its existing light-mode utility classes;
+   this section redefines what they paint. Nothing in the HTML
+   has to change. */
+
+.bg-white,
+.bg-slate-50,
+.bg-slate-100      { background-color: var(--bg-card); }
+.bg-slate-200      { background-color: var(--bg-raised); }
+.bg-slate-700      { background-color: var(--bg-raised); }
+.bg-slate-800,
+.bg-slate-800\/90,
+.bg-slate-900      { background-color: var(--bg-card); }
+
+.text-slate-900,
+.text-slate-800    { color: var(--ink); }
+.text-slate-700,
+.text-slate-600    { color: var(--ink-body); }
+.text-slate-500,
+.text-slate-400    { color: var(--ink-muted); }
+.text-slate-100,
+.text-white        { color: var(--ink); }
+.text-black        { color: var(--ink); }
+
+.border-slate-200,
+.border-slate-300  { border-color: var(--line); }
+.border-slate-700  { border-color: var(--line-loud); }
+.border-black      { border-color: var(--line); }
+
+.divide-slate-200 > * + * { border-color: var(--line-soft); }
+
+.shadow, .shadow-md, .shadow-lg {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+
+/* ── 4. Shell ──────────────────────────────────────────────── */
+/* The screenshot stretches a three-column table across 2500px,
+   which is why the eye can't connect a stage name to its due
+   date. Cap the measure. */
+
+main, .shell {
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+
+/* ── 5. Header ─────────────────────────────────────────────── */
+
+header,
 header.bg-slate-800\/90 {
-  background-color: var(--surface-dark) !important;
-  border-bottom: 1px solid #334155 !important;
+  background: linear-gradient(180deg, #16202C 0%, #121A24 100%);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
 }
 
-.app-header h1,
-header.bg-slate-800\/90 h1 {
-  color: var(--on-dark-strong) !important;
-  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
-  letter-spacing: -0.01em;
-  font-weight: 650;
+/* The hairline the header already had — keep it, it's the one
+   piece of brand colour above the fold. */
+header::before {
+  content: "";
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal-deep), var(--teal), var(--teal-bright));
 }
 
-/* Subtitle stays muted — this is what restores the hierarchy */
-.app-header p,
-.app-header .text-slate-400,
-header.bg-slate-800\/90 p,
-header.bg-slate-800\/90 .text-slate-400 {
-  color: var(--on-dark-muted) !important;
+header h1 {
+  color: var(--ink);
+  font-size: clamp(1.05rem, 0.9rem + 0.5vw, 1.35rem);
+  font-weight: 600;
+}
+
+/* Subtitle stays quieter than the title. Forcing both to pure
+   white, as the old file did, flattened the hierarchy. */
+header p,
+header .text-slate-400 {
+  color: var(--ink-muted);
   font-size: 0.8125rem;
-  line-height: 1.5;
+  margin-top: 2px;
 }
 
-.app-header .text-slate-100,
-header.bg-slate-800\/90 .text-slate-100 {
-  color: var(--on-dark-strong) !important;
-}
-
-.app-header .accent,
-header.bg-slate-800\/90 .accent {
-  color: var(--on-dark-accent) !important;
-}
-
-.app-header .bg-slate-700,
-header.bg-slate-800\/90 .bg-slate-700 {
-  background-color: #334155 !important;   /* was #475569 — too close to button fill */
-}
-
-.app-header button,
-header.bg-slate-800\/90 button {
-  background-color: #334155 !important;
-  border: 1px solid #64748B !important;   /* 2.3:1 vs fill — visible edge */
-  color: var(--on-dark-strong) !important;
+header button {
+  background: var(--bg-raised);
+  border: 1px solid var(--line-loud);
+  color: var(--ink);
+  border-radius: var(--r-sm);
+  padding: 7px 14px;
   font-size: 0.8125rem;
-  font-weight: 550;
-  letter-spacing: 0.005em;
+  font-weight: 500;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+header button:hover {
+  background: #2A3746;
+  border-color: var(--teal-deep);
 }
 
-.app-header button:hover,
-header.bg-slate-800\/90 button:hover {
-  background-color: #475569 !important;
-  border-color: var(--brand-400) !important;
-}
-
-.app-header :focus-visible,
-header.bg-slate-800\/90 :focus-visible {
-  outline-color: var(--brand-300);   /* teal-600 is invisible on navy */
-}
-
-/* ---- Logo ---- */
+/* White crest PNG — reads correctly on dark, no filter needed. */
 .theme-logo {
   background-image: url('https://kristujayanti.edu.in/Container-nav.png');
   background-size: contain;
   background-position: left center;
   background-repeat: no-repeat;
-  height: 60px;
-  width: 250px;
+  height: 56px;
+  width: 230px;
   max-width: 100%;
-  aspect-ratio: 250 / 60;
   display: block;
-  text-indent: -9999px;   /* lets you put real text in the element as a fallback */
+  text-indent: -9999px;   /* put the university name inside the div as a fallback */
   overflow: hidden;
 }
 
-@media (max-width: 640px) {
-  .theme-logo { height: 40px; width: 165px; }
-  p, li { max-width: none; }
+
+/* ── 6. Tabs ───────────────────────────────────────────────── */
+
+.tab-bar { border-bottom: 1px solid var(--line); gap: 4px; }
+
+.tab {
+  color: var(--ink-muted);
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s ease;
+}
+.tab:hover { color: var(--ink-body); }
+.tab[aria-selected="true"], .tab.is-active {
+  color: var(--teal-bright);
+  border-bottom-color: var(--teal);
+}
+
+/* Segmented control (Project-Wise / Date-Wise Agenda) */
+.segmented {
+  display: inline-flex;
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 3px;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.segmented button[aria-pressed="true"], .segmented button.is-active {
+  background: var(--teal-deep);
+  color: #EAFFFB;
+}
+
+
+/* ── 7. Cards ──────────────────────────────────────────────── */
+
+.card, section.card, .panel {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 22px 24px;
+}
+
+.card + .card, .panel + .panel { margin-top: 18px; }
+
+/* Project ID — mono here is functional, you read it character
+   by character when matching records. Nowhere else. */
+.project-id {
+  font-family: var(--font-id);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.01em;
+}
+
+
+/* ── 8. Progress ───────────────────────────────────────────── */
+
+.progress {
+  height: 7px;
+  background: var(--bg-input);
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  min-width: 3px;              /* 0% still shows a mark, so the bar never looks broken */
+  background: linear-gradient(90deg, var(--teal-deep), var(--teal));
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.progress-label {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+
+/* ── 9. Forms ──────────────────────────────────────────────── */
+
+input[type="text"], input[type="date"], input[type="number"],
+input[type="email"], textarea, select {
+  background: var(--bg-input);
+  border: 1px solid var(--line-loud);
+  color: var(--ink);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input::placeholder, textarea::placeholder { color: var(--ink-faint); }
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--teal-wash);
+}
+
+/* Native calendar glyph is black by default; invert it. */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.55);
+  cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover { filter: invert(1) opacity(1); }
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394A7BB' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--teal);
+  cursor: pointer;
+}
+
+label, .field-label {
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+
+/* ── 10. Buttons ───────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--r-sm);
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--teal-deep);
+  color: #EAFFFB;
+  border-color: #14857A;
+}
+.btn-primary:hover { background: #13867B; }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line-loud);
+  color: var(--ink-body);
+}
+.btn-ghost:hover { background: var(--bg-raised); color: var(--ink); }
+
+.btn-danger { background: transparent; color: var(--st-overdue); border-color: transparent; }
+.btn-danger:hover { background: rgba(251, 113, 133, 0.12); }
+
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+
+/* ── 11. Table ─────────────────────────────────────────────── */
+
+.table-wrap {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: auto;              /* wide table scrolls itself, page never does */
+  background: var(--bg-card);
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+/* Sentence case, not ALL CAPS — caps at this size cost you
+   word-shape, which is the thing that makes a header scannable. */
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-raised);
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink-body);
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: rgba(255, 255, 255, 0.022); }
+
+/* Order numbers, dates and counts stop jittering row to row. */
+td.num, th.num, .tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+td.stage-name { color: var(--ink); font-weight: 500; }
+
+.row-handle { color: var(--ink-faint); cursor: grab; }
+.row-handle:active { cursor: grabbing; }
+
+
+/* ── 12. Status ────────────────────────────────────────────── */
+/* The one place this theme raises its voice. Everything else
+   stays quiet so these read instantly down the column. */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 4px 11px 4px 9px;
+  border-radius: 99px;
+  border: 1px solid currentColor;
+  background: transparent;
+}
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: currentColor;
+}
+
+.status-pending { color: var(--st-pending); }
+.status-active  { color: var(--st-active);  background: rgba(240, 180, 41, 0.10); }
+.status-done    { color: var(--st-done);    background: rgba(45, 212, 191, 0.10); }
+.status-overdue { color: var(--st-overdue); background: rgba(251, 113, 133, 0.10); }
+
+/* Overdue earns a row marker — a date in the past is the one
+   thing a tracker exists to surface. */
+tr.is-overdue td:first-child { box-shadow: inset 3px 0 0 var(--st-overdue); }
+
+
+/* ── 13. Empty states ──────────────────────────────────────── */
+
+.empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--ink-muted);
+}
+.empty strong { display: block; color: var(--ink); font-weight: 500; margin-bottom: 4px; }
+
+
+/* ── 14. Responsive & motion ───────────────────────────────── */
+
+@media (max-width: 720px) {
+  main, .shell { padding-inline: 16px; }
+  .card, .panel { padding: 16px; border-radius: var(--r-md); }
+  .theme-logo { height: 38px; width: 155px; }
+  thead th, tbody td { padding: 10px 12px; }
+  p { max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
