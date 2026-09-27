@@ -1,5 +1,13 @@
 import { neon } from '@neondatabase/serverless';
 
+function parseBody(req) {
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch (e) { /* leave as-is */ }
+  }
+  return body || {};
+}
+
 export default async function handler(req, res) {
   try {
     const sql = neon(process.env.POSTGRES_URL || process.env.DATABASE_URL);
@@ -16,12 +24,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      let body = req.body;
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch(e) {}
-      }
-
-      const { projectName, startDateStr, presetId } = body || {};
+      const { projectName, startDateStr, presetId } = parseBody(req);
       const projectId = `PRJ_${Math.random().toString(36).substring(2, 10)}`;
 
       await sql`
@@ -46,35 +49,87 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, projectId });
     }
 
+    /* PUT - rename, reschedule, or both.
+       Both fields are optional. The front end deliberately omits
+       newStartDateStr on a pure rename, because recalculating would
+       overwrite due dates that were edited by hand in the table. */
     if (req.method === 'PUT') {
-      let body = req.body;
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch(e) {}
+      const { projectId, newStartDateStr, projectName } = parseBody(req);
+
+      if (!projectId) {
+        return res.status(400).json({ error: 'projectId is required' });
       }
 
-      const { projectId, newStartDateStr } = body || {};
-      await sql`UPDATE projects SET start_date = ${newStartDateStr} WHERE project_id = ${projectId}`;
+      const existing = await sql`SELECT * FROM projects WHERE project_id = ${projectId}`;
+      if (existing.length === 0) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
 
-      const proj = await sql`SELECT * FROM projects WHERE project_id = ${projectId}`;
-      if (proj.length > 0 && proj[0].preset_id) {
-        const presetStages = await sql`SELECT * FROM preset_stages WHERE preset_id = ${proj[0].preset_id}`;
-        const baseDate = new Date(newStartDateStr);
+      if (typeof projectName === 'string') {
+        const trimmed = projectName.trim();
+        if (!trimmed) {
+          return res.status(400).json({ error: 'Project name cannot be empty' });
+        }
+        await sql`UPDATE projects SET project_name = ${trimmed} WHERE project_id = ${projectId}`;
+      }
 
-        for (const stg of presetStages) {
-          const calcDueDate = new Date(baseDate);
-          calcDueDate.setDate(calcDueDate.getDate() + stg.days_offset);
-          const dueDateStr = calcDueDate.toISOString().split('T')[0];
+      if (newStartDateStr) {
+        await sql`UPDATE projects SET start_date = ${newStartDateStr} WHERE project_id = ${projectId}`;
 
-          await sql`
-            UPDATE project_stages 
-            SET calculated_due_date = ${dueDateStr} 
-            WHERE project_id = ${projectId} AND stage_order = ${stg.stage_order}
-          `;
+        if (existing[0].preset_id) {
+          const presetStages = await sql`SELECT * FROM preset_stages WHERE preset_id = ${existing[0].preset_id}`;
+          const baseDate = new Date(newStartDateStr);
+
+          for (const stg of presetStages) {
+            const calcDueDate = new Date(baseDate);
+            calcDueDate.setDate(calcDueDate.getDate() + stg.days_offset);
+            const dueDateStr = calcDueDate.toISOString().split('T')[0];
+
+            await sql`
+              UPDATE project_stages
+              SET calculated_due_date = ${dueDateStr}
+              WHERE project_id = ${projectId} AND stage_order = ${stg.stage_order}
+            `;
+          }
         }
       }
 
       return res.status(200).json({ success: true });
     }
+
+    /* DELETE - removes the project and every stage under it.
+       Stages go first so this works whether or not the FK was
+       declared ON DELETE CASCADE. projectId is accepted from the
+       body or the query string, because some proxies drop bodies
+       on DELETE requests. */
+    if (req.method === 'DELETE') {
+      const body = parseBody(req);
+      const projectId = body.projectId || req.query.projectId;
+
+      if (!projectId) {
+        return res.status(400).json({ error: 'projectId is required' });
+      }
+
+      const existing = await sql`SELECT project_name FROM projects WHERE project_id = ${projectId}`;
+      if (existing.length === 0) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+
+      const stages = await sql`SELECT COUNT(*) FROM project_stages WHERE project_id = ${projectId}`;
+      const deletedStages = parseInt(stages[0].count, 10);
+
+      await sql`DELETE FROM project_stages WHERE project_id = ${projectId}`;
+      await sql`DELETE FROM projects WHERE project_id = ${projectId}`;
+
+      return res.status(200).json({
+        success: true,
+        projectId,
+        projectName: existing[0].project_name,
+        deletedStages
+      });
+    }
+
+    return res.status(405).json({ error: 'Method Not Allowed' });
   } catch (error) {
     console.error('Projects API Error:', error);
     return res.status(500).json({ error: error.message });
