@@ -1,69 +1,70 @@
 /* ============================================================
-   Project Tracker — dark theme
-   Kristu Jayanti University
+   BinosProjectTracker — dark theme
+   Navy surfaces, indigo action colour, amber as the single
+   warm note (it comes from the bolt in the logo mark).
 
-   Load this AFTER Tailwind. Order matters: the remap section
-   ties specificity with Tailwind's utilities and wins on order,
-   which is why there is almost no !important in this file.
+   Load AFTER Tailwind. Order matters: the remap section ties
+   specificity with Tailwind's utilities and wins on order,
+   which is why there's almost no !important in here.
 
-     <link rel="stylesheet" href="/tracker-dark.css">
+     <link rel="stylesheet" href="/tracker-theme.css">
 
-   Fonts (optional but recommended — the @import at the top of
-   this file works, a <link> in <head> is faster):
+   Fonts — the @import below works, a <link> in <head> is faster:
      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 
 /* ── 1. Tokens ─────────────────────────────────────────────── */
 
 :root {
-  /* Surfaces — desaturated navy, not tinted black.
-     Three steps only: page, card, raised. More steps than that
-     and nothing reads as foreground. */
-  --bg-page:    #101720;
-  --bg-card:    #18212C;
-  --bg-raised:  #212C3A;
-  --bg-input:   #0C1218;   /* inputs sit *below* the card, not above */
+  /* Surfaces — four steps, no more. Beyond four nothing reads
+     as foreground any more. */
+  --bg-page:   #141A27;
+  --bg-header: #1B2332;
+  --bg-card:   #1E2736;
+  --bg-raised: #28334A;   /* Refresh Data button, table head */
+  --bg-input:  #10151F;   /* fields sit BELOW the card, not above */
 
-  --line:       #2A3746;   /* default border */
-  --line-soft:  #212C3A;   /* table row dividers */
-  --line-loud:  #3B4C60;   /* input borders, needs to be findable */
+  --line:      #2C3647;
+  --line-soft: #232C3C;   /* row dividers */
+  --line-loud: #3A465C;   /* field borders — has to be findable */
 
-  /* Text — ratios against --bg-card (#18212C) */
-  --ink:        #E6EDF5;   /* 13.2:1  headings, values */
-  --ink-body:   #C3D0DE;   /*  9.5:1  body */
-  --ink-muted:  #94A7BB;   /*  5.8:1  labels, captions */
-  --ink-faint:  #6F8299;   /*  3.4:1  decorative only — never text */
+  /* Text — contrast ratios measured against --bg-card */
+  --ink:       #F2F5FA;   /* 14.6:1  headings, stage names */
+  --ink-body:  #C8D1E0;   /*  9.6:1  body, cell values */
+  --ink-muted: #909CB3;   /*  5.3:1  labels, column heads */
+  --ink-faint: #67738C;   /*  2.9:1  drag handles, dividers — never text */
 
-  /* Brand */
-  --teal:       #2DD4BF;
-  --teal-bright:#5EEAD4;
-  --teal-deep:  #0F766E;
-  --teal-wash:  rgba(45, 212, 191, 0.12);
+  /* Action */
+  --blue:       #3B5BFD;
+  --blue-hover: #2F4BE8;
+  --blue-press: #2540CC;
+  --blue-ink:   #8098FF;   /* #3B5BFD is only 3.3:1 on navy — use this for text/links */
+  --blue-wash:  rgba(59, 91, 253, 0.14);
 
-  /* Status — these carry information, so each hue is distinct.
-     Teal means finished, which is why the progress bar is teal. */
-  --st-pending:  #8FA3B8;
-  --st-active:   #F0B429;
-  --st-done:     #2DD4BF;
-  --st-overdue:  #FB7185;
+  --amber: #FACC15;        /* the bolt. Used once in the mark, once in status. */
 
-  /* Type */
-  --font: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Status — each hue means one thing, and only one thing */
+  --st-pending: #8A96AE;
+  --st-active:  #FACC15;
+  --st-done:    #34D399;
+  --st-overdue: #F0614F;   /* same red as the trash icon, deliberately */
+
+  --font:    "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-id: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --r-sm: 6px;
+  --r-sm: 7px;
   --r-md: 10px;
   --r-lg: 14px;
 
-  --shell: 1180px;
+  --shell: 1240px;
 
-  /* Tells the browser to render native date pickers, selects,
-     checkboxes and scrollbars dark. Without this line the date
-     fields stay white-on-white — that was half the problem. */
+  /* Renders native date pickers, selects, checkboxes and
+     scrollbars dark. Without it the DONE checkbox stays a white
+     box — which is exactly what it's doing in your screenshot. */
   color-scheme: dark;
 }
 
@@ -87,31 +88,27 @@ body {
 h1, h2, h3, h4 {
   color: var(--ink);
   line-height: 1.2;
-  letter-spacing: -0.014em;
+  letter-spacing: -0.018em;
   font-weight: 600;
   text-wrap: balance;
 }
 
 p { max-width: 70ch; text-wrap: pretty; }
 
-hr { border: 0; border-top: 1px solid var(--line); }
+/* Selection: low-alpha tint, forced readable foreground. A
+   saturated block over every line is what broke the last pass. */
+::selection      { background: rgba(59, 91, 253, 0.38); color: #FFFFFF; text-shadow: none; }
+::-moz-selection { background: rgba(59, 91, 253, 0.38); color: #FFFFFF; text-shadow: none; }
 
-/* THE SELECTION FIX.
-   A saturated block over every line is what made the page
-   unreadable. Low-alpha tint, forced readable foreground,
-   no text-shadow bleeding through. */
-::selection      { background: rgba(45, 212, 191, 0.30); color: #FFFFFF; text-shadow: none; }
-::-moz-selection { background: rgba(45, 212, 191, 0.30); color: #FFFFFF; text-shadow: none; }
-
-/* Selection inside inputs needs its own rule or it inherits
-   the page value and disappears against the darker field. */
+/* Fields need their own rule or selection vanishes against the
+   darker input background. */
 input::selection, textarea::selection, select::selection {
-  background: rgba(94, 234, 212, 0.35);
+  background: rgba(128, 152, 255, 0.42);
   color: #FFFFFF;
 }
 
 :focus-visible {
-  outline: 2px solid var(--teal-bright);
+  outline: 2px solid var(--blue-ink);
   outline-offset: 2px;
   border-radius: var(--r-sm);
 }
@@ -123,49 +120,33 @@ input::selection, textarea::selection, select::selection {
   border-radius: 99px;
   border: 3px solid var(--bg-page);
 }
-::-webkit-scrollbar-thumb:hover { background: #4E6480; }
+::-webkit-scrollbar-thumb:hover { background: #4C5B75; }
 
 
 /* ── 3. Tailwind remap ─────────────────────────────────────── */
-/* Your markup keeps its existing light-mode utility classes;
-   this section redefines what they paint. Nothing in the HTML
-   has to change. */
+/* Your existing utility classes keep working — this just
+   redefines what they paint. No markup changes needed. */
 
-.bg-white,
-.bg-slate-50,
-.bg-slate-100      { background-color: var(--bg-card); }
-.bg-slate-200      { background-color: var(--bg-raised); }
-.bg-slate-700      { background-color: var(--bg-raised); }
-.bg-slate-800,
-.bg-slate-800\/90,
-.bg-slate-900      { background-color: var(--bg-card); }
+.bg-white, .bg-slate-50, .bg-slate-100 { background-color: var(--bg-card); }
+.bg-slate-200, .bg-slate-700           { background-color: var(--bg-raised); }
+.bg-slate-800, .bg-slate-800\/90       { background-color: var(--bg-header); }
+.bg-slate-900, .bg-slate-950           { background-color: var(--bg-page); }
 
-.text-slate-900,
-.text-slate-800    { color: var(--ink); }
-.text-slate-700,
-.text-slate-600    { color: var(--ink-body); }
-.text-slate-500,
-.text-slate-400    { color: var(--ink-muted); }
-.text-slate-100,
-.text-white        { color: var(--ink); }
-.text-black        { color: var(--ink); }
+.text-slate-900, .text-slate-800, .text-white, .text-slate-100 { color: var(--ink); }
+.text-slate-700, .text-slate-600                               { color: var(--ink-body); }
+.text-slate-500, .text-slate-400                               { color: var(--ink-muted); }
 
-.border-slate-200,
-.border-slate-300  { border-color: var(--line); }
-.border-slate-700  { border-color: var(--line-loud); }
-.border-black      { border-color: var(--line); }
+.border-slate-200, .border-slate-300, .border-black { border-color: var(--line); }
+.border-slate-700                                   { border-color: var(--line-loud); }
 
 .divide-slate-200 > * + * { border-color: var(--line-soft); }
 
 .shadow, .shadow-md, .shadow-lg {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 10px 28px rgba(0, 0, 0, 0.3);
 }
 
 
 /* ── 4. Shell ──────────────────────────────────────────────── */
-/* The screenshot stretches a three-column table across 2500px,
-   which is why the eye can't connect a stage name to its due
-   date. Cap the measure. */
 
 main, .shell {
   max-width: var(--shell);
@@ -176,129 +157,154 @@ main, .shell {
 
 /* ── 5. Header ─────────────────────────────────────────────── */
 
-header,
-header.bg-slate-800\/90 {
-  background: linear-gradient(180deg, #16202C 0%, #121A24 100%);
+header, header.bg-slate-800\/90 {
+  background: var(--bg-header);
   border-bottom: 1px solid var(--line);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  padding-block: 14px;
 }
 
-/* The hairline the header already had — keep it, it's the one
-   piece of brand colour above the fold. */
-header::before {
-  content: "";
-  display: block;
-  height: 2px;
-  background: linear-gradient(90deg, var(--teal-deep), var(--teal), var(--teal-bright));
-}
+.brand { display: flex; align-items: center; gap: 14px; }
 
-header h1 {
+/* The bolt tile. This is the one saturated object above the
+   fold — everything around it stays quiet so it holds. */
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: grid;
+  place-items: center;
+  background: var(--blue);
+  border-radius: 12px;
+  color: var(--amber);
+  font-size: 22px;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(59, 91, 253, 0.35);
+}
+.brand-mark svg { width: 22px; height: 22px; }
+
+.brand-name {
   color: var(--ink);
-  font-size: clamp(1.05rem, 0.9rem + 0.5vw, 1.35rem);
-  font-weight: 600;
+  font-size: 1.32rem;
+  font-weight: 700;
+  letter-spacing: -0.026em;   /* the wordmark runs together, so tighten it */
+  line-height: 1.15;
 }
 
-/* Subtitle stays quieter than the title. Forcing both to pure
-   white, as the old file did, flattened the hierarchy. */
-header p,
-header .text-slate-400 {
+.brand-tagline,
+header p, header .text-slate-400 {
   color: var(--ink-muted);
   font-size: 0.8125rem;
-  margin-top: 2px;
+  line-height: 1.4;
+  margin-top: 1px;
 }
 
-header button {
+header button, .btn-refresh {
   background: var(--bg-raised);
   border: 1px solid var(--line-loud);
   color: var(--ink);
   border-radius: var(--r-sm);
-  padding: 7px 14px;
-  font-size: 0.8125rem;
+  padding: 8px 15px;
+  font-size: 0.875rem;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
-header button:hover {
-  background: #2A3746;
-  border-color: var(--teal-deep);
-}
-
-/* White crest PNG — reads correctly on dark, no filter needed. */
-.theme-logo {
-  background-image: url('https://kristujayanti.edu.in/Container-nav.png');
-  background-size: contain;
-  background-position: left center;
-  background-repeat: no-repeat;
-  height: 56px;
-  width: 230px;
-  max-width: 100%;
-  display: block;
-  text-indent: -9999px;   /* put the university name inside the div as a fallback */
-  overflow: hidden;
+header button:hover, .btn-refresh:hover {
+  background: #313D57;
+  border-color: var(--blue);
 }
 
 
-/* ── 6. Tabs ───────────────────────────────────────────────── */
+/* ── 6. Tabs & segmented control ───────────────────────────── */
 
-.tab-bar { border-bottom: 1px solid var(--line); gap: 4px; }
+.tab-bar { display: flex; gap: 8px; border-bottom: 1px solid var(--line); }
 
 .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   color: var(--ink-muted);
-  padding: 12px 14px;
-  font-size: 0.9rem;
+  padding: 13px 14px;
+  font-size: 0.95rem;
   font-weight: 500;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  background: none;
+  border-top: 0; border-left: 0; border-right: 0;
+  cursor: pointer;
   transition: color 0.15s ease;
 }
 .tab:hover { color: var(--ink-body); }
 .tab[aria-selected="true"], .tab.is-active {
-  color: var(--teal-bright);
-  border-bottom-color: var(--teal);
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--blue);
 }
+.tab[aria-selected="true"] svg { color: var(--blue-ink); }
 
-/* Segmented control (Project-Wise / Date-Wise Agenda) */
 .segmented {
   display: inline-flex;
   background: var(--bg-input);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  padding: 3px;
+  padding: 4px;
 }
 .segmented button {
   border: 0;
   background: transparent;
   color: var(--ink-muted);
-  padding: 7px 16px;
+  padding: 8px 18px;
   border-radius: 7px;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
+  transition: color 0.15s ease;
 }
+.segmented button:hover { color: var(--ink-body); }
 .segmented button[aria-pressed="true"], .segmented button.is-active {
-  background: var(--teal-deep);
-  color: #EAFFFB;
+  background: var(--blue);
+  color: #FFFFFF;
+  font-weight: 600;
 }
 
 
 /* ── 7. Cards ──────────────────────────────────────────────── */
 
-.card, section.card, .panel {
+.card, .panel {
   background: var(--bg-card);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  padding: 22px 24px;
+  padding: 22px 26px;
 }
+.card + .card, .panel + .panel { margin-top: 20px; }
 
-.card + .card, .panel + .panel { margin-top: 18px; }
+.project-name { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.028em; }
 
-/* Project ID — mono here is functional, you read it character
-   by character when matching records. Nowhere else. */
+/* Mono here is functional — you read an ID character by
+   character when matching records. Nowhere else in the app. */
 .project-id {
   font-family: var(--font-id);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--ink-muted);
-  letter-spacing: 0.01em;
+  margin-top: 2px;
 }
+
+/* Section label. Caps survive at this size only with tracking —
+   without it the letters jam and you lose word shape. */
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+}
+.section-label .icon, .section-label svg { color: var(--blue-ink); }
 
 
 /* ── 8. Progress ───────────────────────────────────────────── */
@@ -306,15 +312,15 @@ header button:hover {
 .progress {
   height: 7px;
   background: var(--bg-input);
+  border: 1px solid var(--line);
   border-radius: 99px;
   overflow: hidden;
-  border: 1px solid var(--line);
 }
 .progress > span {
   display: block;
   height: 100%;
-  min-width: 3px;              /* 0% still shows a mark, so the bar never looks broken */
-  background: linear-gradient(90deg, var(--teal-deep), var(--teal));
+  min-width: 4px;            /* 0% still shows a mark — an empty track reads as broken */
+  background: linear-gradient(90deg, var(--blue), #6A83FF);
   border-radius: 99px;
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -334,40 +340,42 @@ input[type="email"], textarea, select {
   border: 1px solid var(--line-loud);
   color: var(--ink);
   border-radius: var(--r-sm);
-  padding: 9px 12px;
+  padding: 10px 13px;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.925rem;
   width: 100%;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 input::placeholder, textarea::placeholder { color: var(--ink-faint); }
 
+input:hover, textarea:hover, select:hover { border-color: #46546D; }
+
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px var(--teal-wash);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-wash);
 }
 
-/* Native calendar glyph is black by default; invert it. */
+input[type="date"] { font-variant-numeric: tabular-nums; }
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1) opacity(0.55);
+  filter: invert(1) opacity(0.5);
   cursor: pointer;
 }
 input[type="date"]::-webkit-calendar-picker-indicator:hover { filter: invert(1) opacity(1); }
 
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394A7BB' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23909CB3' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
+  background-position: right 13px center;
+  padding-right: 38px;
 }
 
 input[type="checkbox"] {
-  width: 17px;
-  height: 17px;
-  accent-color: var(--teal);
+  width: 18px;
+  height: 18px;
+  accent-color: var(--blue);
   cursor: pointer;
 }
 
@@ -376,7 +384,7 @@ label, .field-label {
   font-size: 0.8125rem;
   font-weight: 500;
   display: inline-block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 
@@ -385,33 +393,28 @@ label, .field-label {
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   border-radius: var(--r-sm);
-  padding: 9px 18px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   border: 1px solid transparent;
+  white-space: nowrap;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.btn-primary {
-  background: var(--teal-deep);
-  color: #EAFFFB;
-  border-color: #14857A;
-}
-.btn-primary:hover { background: #13867B; }
+.btn-primary { background: var(--blue); color: #FFFFFF; }
+.btn-primary:hover  { background: var(--blue-hover); }
+.btn-primary:active { background: var(--blue-press); }
 
-.btn-ghost {
-  background: transparent;
-  border-color: var(--line-loud);
-  color: var(--ink-body);
-}
+.btn-ghost { background: transparent; border-color: var(--line-loud); color: var(--ink-body); }
 .btn-ghost:hover { background: var(--bg-raised); color: var(--ink); }
 
-.btn-danger { background: transparent; color: var(--st-overdue); border-color: transparent; }
-.btn-danger:hover { background: rgba(251, 113, 133, 0.12); }
+.btn-danger { background: transparent; color: var(--st-overdue); }
+.btn-danger:hover { background: rgba(240, 97, 79, 0.13); }
 
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -421,102 +424,107 @@ label, .field-label {
 .table-wrap {
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  overflow: auto;              /* wide table scrolls itself, page never does */
+  overflow: auto;              /* the table scrolls, the page never does */
   background: var(--bg-card);
 }
 
-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.925rem; }
 
-/* Sentence case, not ALL CAPS — caps at this size cost you
-   word-shape, which is the thing that makes a header scannable. */
 thead th {
   position: sticky;
   top: 0;
   z-index: 2;
   background: var(--bg-raised);
   color: var(--ink-muted);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
+  letter-spacing: 0.09em;      /* the fix caps actually need */
+  text-transform: uppercase;
   text-align: left;
-  padding: 12px 16px;
+  padding: 13px 16px;
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
 
 tbody td {
-  padding: 13px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--line-soft);
   color: var(--ink-body);
   vertical-align: middle;
 }
-
 tbody tr:last-child td { border-bottom: 0; }
-tbody tr:hover td { background: rgba(255, 255, 255, 0.022); }
+tbody tr:hover td { background: rgba(255, 255, 255, 0.025); }
 
-/* Order numbers, dates and counts stop jittering row to row. */
 td.num, th.num, .tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
 
-td.stage-name { color: var(--ink); font-weight: 500; }
+/* #1, #2, #3 — quiet, it's an index not a value */
+td.order { color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+/* Stage name is the thing you scan for, so it's the only bold
+   cell in the row. Cap the measure or long names push the due
+   date off the fold. */
+td.stage-name {
+  color: var(--ink);
+  font-weight: 600;
+  max-width: 46ch;
+}
 
 .row-handle { color: var(--ink-faint); cursor: grab; }
 .row-handle:active { cursor: grabbing; }
+tr:hover .row-handle { color: var(--ink-muted); }
+
+td .remarks-input { background: var(--bg-input); font-size: 0.875rem; padding: 8px 11px; }
 
 
 /* ── 12. Status ────────────────────────────────────────────── */
-/* The one place this theme raises its voice. Everything else
-   stays quiet so these read instantly down the column. */
 
 .status {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  padding: 4px 11px 4px 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px 4px 10px;
   border-radius: 99px;
   border: 1px solid currentColor;
-  background: transparent;
+  white-space: nowrap;
 }
 .status::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 6px; height: 6px;
   border-radius: 99px;
   background: currentColor;
 }
 
 .status-pending { color: var(--st-pending); }
-.status-active  { color: var(--st-active);  background: rgba(240, 180, 41, 0.10); }
-.status-done    { color: var(--st-done);    background: rgba(45, 212, 191, 0.10); }
-.status-overdue { color: var(--st-overdue); background: rgba(251, 113, 133, 0.10); }
+.status-active  { color: var(--st-active);  background: rgba(250, 204, 21, 0.10); }
+.status-done    { color: var(--st-done);    background: rgba(52, 211, 153, 0.10); }
+.status-overdue { color: var(--st-overdue); background: rgba(240, 97, 79, 0.11); }
 
-/* Overdue earns a row marker — a date in the past is the one
-   thing a tracker exists to surface. */
+/* A past due date is the one thing a tracker exists to surface. */
 tr.is-overdue td:first-child { box-shadow: inset 3px 0 0 var(--st-overdue); }
+tr.is-overdue .due-date { color: var(--st-overdue); font-weight: 600; }
 
 
 /* ── 13. Empty states ──────────────────────────────────────── */
 
-.empty {
-  text-align: center;
-  padding: 48px 24px;
-  color: var(--ink-muted);
-}
-.empty strong { display: block; color: var(--ink); font-weight: 500; margin-bottom: 4px; }
+.empty { text-align: center; padding: 52px 24px; color: var(--ink-muted); }
+.empty strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
 
 
 /* ── 14. Responsive & motion ───────────────────────────────── */
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
   main, .shell { padding-inline: 16px; }
   .card, .panel { padding: 16px; border-radius: var(--r-md); }
-  .theme-logo { height: 38px; width: 155px; }
-  thead th, tbody td { padding: 10px 12px; }
+  .brand-mark { width: 38px; height: 38px; flex-basis: 38px; border-radius: 10px; }
+  .brand-name { font-size: 1.1rem; }
+  .project-name { font-size: 1.3rem; }
+  thead th, tbody td { padding: 11px 12px; }
+  td.stage-name { max-width: none; }
   p { max-width: none; }
 }
 
