@@ -13,16 +13,6 @@
   <script>
     /* ------------------------------------------------------------------
        BRAND PALETTE — Invincible YOU (anchor colour #680087)
-
-       Rather than rewriting every class in the markup, the existing
-       Tailwind scales are remapped to brand values. Change a hex here and
-       it updates everywhere in the app.
-         slate.*   -> plum-tinted neutrals (backgrounds, borders, text)
-         blue.*    -> Invincible YOU violet (primary actions, accents)
-         red/amber -> overdue / due-today signals, warmed to fit the palette
-       Note: blue-700 is intentionally LIGHTER than blue-600 so that the
-       `hover:bg-blue-700` pattern already in the markup brightens on hover
-       against the dark background instead of sinking into it.
     ------------------------------------------------------------------ */
     tailwind.config = {
       theme: {
@@ -271,6 +261,11 @@
     let stageDragIndex = null;
     let dragSrcIndex = null;
 
+    // Helper functions to handle property name variations across different backend responses
+    function getProjId(p) { return p ? (p.projectId || p.project_id || p.id || '') : ''; }
+    function getProjName(p) { return p ? (p.projectName || p.project_name || p.name || '') : ''; }
+    function getProjStartDate(p) { return p ? (p.startDate || p.start_date || '') : ''; }
+
     function showLoader() { document.getElementById('loader').classList.replace('hidden', 'flex'); }
     function hideLoader() { document.getElementById('loader').classList.replace('flex', 'hidden'); }
     function showToast(msg) {
@@ -315,18 +310,21 @@
         globalProjects = await projRes.json();
 
         const projSelect = document.getElementById('project-select');
-        projSelect.innerHTML = globalProjects.length ? globalProjects.map(p => `<option value="${p.projectId}">${p.projectName}</option>`).join('') : '<option value="">No projects found</option>';
+        projSelect.innerHTML = globalProjects.length 
+          ? globalProjects.map(p => `<option value="${getProjId(p)}">${getProjName(p)}</option>`).join('') 
+          : '<option value="">No projects found</option>';
 
         hideLoader();
-        if (globalProjects.length > 0 && currentDashboardView === 'project') renderProjectDashboard();
-        else if (globalProjects.length === 0) {
+        if (globalProjects.length > 0 && currentDashboardView === 'project') {
+          renderProjectDashboard();
+        } else if (globalProjects.length === 0) {
           document.getElementById('project-card-header').innerHTML = '<p class="text-slate-400 text-sm">No projects found. Create one using the "New Project" tab.</p>';
           document.getElementById('stages-table-body').innerHTML = '';
           document.getElementById('add-stage-box').classList.add('hidden');
         }
       } catch (err) {
         hideLoader();
-        console.error(err);
+        console.error('Initialization error:', err);
       }
     }
 
@@ -338,36 +336,40 @@
       }
 
       document.getElementById('add-stage-box').classList.remove('hidden');
-      const project = globalProjects.find(p => p.projectId === projId);
+      const project = globalProjects.find(p => String(getProjId(p)) === String(projId));
       if (!project) return;
-      
+
+      const pId = getProjId(project);
+      const pName = getProjName(project);
+      const pStart = getProjStartDate(project);
+
       showLoader();
 
-      const res = await fetch(`/api/stages?projectId=${projId}`);
+      const res = await fetch(`/api/stages?projectId=${pId}`);
       currentProjectStages = await res.json();
       hideLoader();
 
       const completed = currentProjectStages.filter(s => s.isCompleted).length;
       const pct = currentProjectStages.length ? Math.round((completed / currentProjectStages.length) * 100) : 0;
 
-      // Header updated with Edit and Delete actions
+      // Header render
       document.getElementById('project-card-header').innerHTML = `
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
           <div>
             <div class="flex items-center gap-3">
-              <h2 class="text-xl font-bold text-white">${project.projectName}</h2>
-              <button onclick="handleEditProject('${project.projectId}', '${project.projectName.replace(/'/g, "\\'")}')" class="text-xs bg-slate-900 hover:bg-slate-700 text-blue-300 border border-slate-700 px-2 py-1 rounded transition" title="Edit Name">
+              <h2 class="text-xl font-bold text-white">${pName}</h2>
+              <button onclick="handleEditProject('${pId}', '${pName.replace(/'/g, "\\'")}')" class="text-xs bg-slate-900 hover:bg-slate-700 text-blue-300 border border-slate-700 px-2 py-1 rounded transition" title="Edit Name">
                 <i class="fa-solid fa-pen mr-1"></i> Edit
               </button>
-              <button onclick="handleDeleteProject('${project.projectId}', '${project.projectName.replace(/'/g, "\\'")}')" class="text-xs bg-slate-900 hover:bg-red-900/50 text-red-400 border border-slate-700 hover:border-red-500/50 px-2 py-1 rounded transition" title="Delete Project">
+              <button onclick="handleDeleteProject('${pId}', '${pName.replace(/'/g, "\\'")}')" class="text-xs bg-slate-900 hover:bg-red-900/50 text-red-400 border border-slate-700 hover:border-red-500/50 px-2 py-1 rounded transition" title="Delete Project">
                 <i class="fa-solid fa-trash-can mr-1"></i> Delete
               </button>
             </div>
-            <p class="text-xs text-slate-400 num mt-1">ID: ${project.projectId}</p>
+            <p class="text-xs text-slate-400 num mt-1">ID: ${pId}</p>
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">Edit Start Date</label>
-            <input type="date" value="${project.startDate}" onchange="handleStartDateChange('${project.projectId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white num">
+            <input type="date" value="${pStart}" onchange="handleStartDateChange('${pId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white num">
           </div>
         </div>
         <div class="flex items-center gap-3">
@@ -570,7 +572,7 @@
 
       const renderCards = (arr) => arr.length ? arr.map(i => `
         <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 mb-2">
-          <span class="text-xs text-blue-400 block">${i.projectName}</span>
+          <span class="text-xs text-blue-400 block">${i.projectName || i.project_name}</span>
           <div class="flex justify-between items-center gap-2"><h4 class="font-bold text-sm text-white">${i.stageName}</h4><span class="text-xs num text-slate-400 shrink-0">${i.calculatedDueDate}</span></div>
           <button onclick="handleStageUpdate(${i.id}, true, '${i.remarks || ''}')" class="text-xs text-emerald-400 hover:underline mt-2">Mark Complete</button>
         </div>
