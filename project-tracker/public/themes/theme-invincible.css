@@ -30,12 +30,12 @@
 }
 
 .theme-logo {
-  /* This pulls the image directly from the CSS */
-  content: url('https://invincibleyou.world/_next/image?url=%2Flogo2.png&w=640&q=75');
+  background-image: url('https://invincibleyou.world/_next/image?url=%2Flogo2.png&w=640&q=75');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   
-  /* This locks the height and automatically scales the width to match */
   height: 28px;
-  max-width: 190px;
+  width: 150px; /* Adjust this width based on the specific logo's proportions */
   display: block;
-  object-fit: contain;
 }
