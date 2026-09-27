@@ -28,14 +28,14 @@
   --logo-shadow-hover: rgba(160, 64, 196, 0.85);
   --selection-bg: rgba(160, 64, 196, 0.45);
 }
-
 .theme-logo {
-  background-image: url('https://invincibleyou.world/_next/image?url=%2Flogo2.png&w=640&q=75');
+  /* Using your live Next.js image URL */
+  background-image: url("https://invincibleyou.world/_next/image?url=%2Flogo2.png&w=3840&q=75");
   background-size: contain;
-  background-position: center;
+  background-position: left center;
   background-repeat: no-repeat;
   
   height: 28px;
-  width: 150px; /* Adjust this width based on the specific logo's proportions */
+  width: 190px; /* Adjust this if the logo gets cut off */
   display: block;
 }
