@@ -11,6 +11,19 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    /* ------------------------------------------------------------------
+       BRAND PALETTE — Invincible YOU (anchor colour #680087)
+
+       Rather than rewriting every class in the markup, the existing
+       Tailwind scales are remapped to brand values. Change a hex here and
+       it updates everywhere in the app.
+         slate.*   -> plum-tinted neutrals (backgrounds, borders, text)
+         blue.*    -> Invincible YOU violet (primary actions, accents)
+         red/amber -> overdue / due-today signals, warmed to fit the palette
+       Note: blue-700 is intentionally LIGHTER than blue-600 so that the
+       `hover:bg-blue-700` pattern already in the markup brightens on hover
+       against the dark background instead of sinking into it.
+    ------------------------------------------------------------------ */
     tailwind.config = {
       theme: {
         extend: {
@@ -39,6 +52,30 @@
   <link rel="stylesheet" href="__THEME_FILE__">
 </head>
 
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          slate: {
+            50: 'var(--slate-50)', 100: 'var(--slate-100)', 200: 'var(--slate-200)', 300: 'var(--slate-300)',
+            400: 'var(--slate-400)', 500: 'var(--slate-500)', 600: 'var(--slate-600)', 700: 'var(--slate-700)',
+            800: 'var(--slate-800)', 900: 'var(--slate-900)', 950: 'var(--slate-950)'
+          },
+          blue: {
+            300: 'var(--brand-300)', 400: 'var(--brand-400)', 500: 'var(--brand-500)',
+            600: 'var(--brand-600)', 700: 'var(--brand-700)', 800: 'var(--brand-800)', 900: 'var(--brand-900)'
+          },
+          red: { 300: '#F5AEBC', 400: '#EE7F96', 500: '#D94363', 600: '#BE2E4D' },
+          amber: { 300: '#F3CE8E', 400: '#E9AC55', 500: '#D6913A' },
+          emerald: { 300: '#8FDFC2', 400: '#4FC79E', 500: '#2FAE85' },
+          yellow: { 300: '#F5D98A' }
+        }
+      }
+    }
+  };
+</script>
+
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col relative">
 
   <!-- Loader Overlay -->
@@ -58,8 +95,8 @@
         </span>
         <span class="hidden sm:block w-px h-10 bg-slate-300 shrink-0"></span>
         <span class="min-w-0 hidden sm:block">
-          <h1 class="font-semibold text-[15px] text-white tracking-tight truncate">Project Tracker</h1>
-          <p class="text-xs text-slate-200 truncate">Let's stay organised</p>
+          <h1 class="font-semibold text-[15px] text-slate-800 tracking-tight truncate">Project Tracker</h1>
+          <p class="text-xs text-slate-500 truncate">Let's stay organised</p>
         </span>
       </a>
 
@@ -227,17 +264,28 @@
   </div>
 
   <script>
+    /* The Invincible YOU logo, served by the website's image optimiser.
+       w=3840 is the full-size render; dropping it to w=640 loads far less for
+       a 28px-tall header mark. If this ever fails, the text wordmark in the
+       header takes its place. 
+    const ORG_LOGO_SRC = 'https://invincibleyou.world/_next/image?url=%2Flogo2.png&w=3840&q=75';
+
+    function showLogoFallback() {
+      document.getElementById('org-logo').classList.add('hidden');
+      document.getElementById('org-logo-fallback').classList.remove('hidden');
+    }
+    function loadOrgLogo() {
+      const img = document.getElementById('org-logo');
+      if (!ORG_LOGO_SRC) { showLogoFallback(); return; }
+      img.src = ORG_LOGO_SRC;
+    }*/
+
     let globalProjects = [];
     let globalPresets = [];
     let currentDashboardView = 'project';
     let currentProjectStages = [];
     let stageDragIndex = null;
     let dragSrcIndex = null;
-
-    // Robust property accessors
-    function getProjId(p) { return p ? (p.projectId || p.project_id || p.id || '') : ''; }
-    function getProjName(p) { return p ? (p.projectName || p.project_name || p.name || '') : ''; }
-    function getProjStartDate(p) { return p ? (p.startDate || p.start_date || '') : ''; }
 
     function showLoader() { document.getElementById('loader').classList.replace('hidden', 'flex'); }
     function hideLoader() { document.getElementById('loader').classList.replace('flex', 'hidden'); }
@@ -283,20 +331,13 @@
         globalProjects = await projRes.json();
 
         const projSelect = document.getElementById('project-select');
-        if (Array.isArray(globalProjects) && globalProjects.length > 0) {
-          projSelect.innerHTML = globalProjects.map(p => `<option value="${getProjId(p)}">${getProjName(p)}</option>`).join('');
-          hideLoader();
-          if (currentDashboardView === 'project') renderProjectDashboard();
-        } else {
-          projSelect.innerHTML = '<option value="">No projects found</option>';
-          document.getElementById('project-card-header').innerHTML = '<p class="text-slate-400 text-sm">No projects found. Create one using the "New Project" tab.</p>';
-          document.getElementById('stages-table-body').innerHTML = '';
-          document.getElementById('add-stage-box').classList.add('hidden');
-          hideLoader();
-        }
+        projSelect.innerHTML = globalProjects.length ? globalProjects.map(p => `<option value="${p.projectId}">${p.projectName}</option>`).join('') : '<option value="">No projects found</option>';
+
+        hideLoader();
+        if (globalProjects.length > 0 && currentDashboardView === 'project') renderProjectDashboard();
       } catch (err) {
         hideLoader();
-        console.error('Initialization error:', err);
+        console.error(err);
       }
     }
 
@@ -308,50 +349,32 @@
       }
 
       document.getElementById('add-stage-box').classList.remove('hidden');
-      const project = globalProjects.find(p => String(getProjId(p)) === String(projId));
-      if (!project) return;
-
-      const pId = getProjId(project);
-      const pName = getProjName(project);
-      const pStart = getProjStartDate(project);
-
+      const project = globalProjects.find(p => p.projectId === projId);
       showLoader();
 
-      const res = await fetch(`/api/stages?projectId=${pId}`);
+      const res = await fetch(`/api/stages?projectId=${projId}`);
       currentProjectStages = await res.json();
       hideLoader();
 
-      const completed = Array.isArray(currentProjectStages) ? currentProjectStages.filter(s => s.isCompleted).length : 0;
-      const totalStages = Array.isArray(currentProjectStages) ? currentProjectStages.length : 0;
-      const pct = totalStages ? Math.round((completed / totalStages) * 100) : 0;
+      const completed = currentProjectStages.filter(s => s.isCompleted).length;
+      const pct = currentProjectStages.length ? Math.round((completed / currentProjectStages.length) * 100) : 0;
 
       document.getElementById('project-card-header').innerHTML = `
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
-          <div>
-            <div class="flex items-center gap-3">
-              <h2 class="text-xl font-bold text-white">${pName}</h2>
-              <button onclick="handleEditProject('${pId}', '${pName.replace(/'/g, "\\'")}')" class="text-xs bg-slate-900 hover:bg-slate-700 text-blue-300 border border-slate-700 px-2 py-1 rounded transition" title="Edit Name">
-                <i class="fa-solid fa-pen mr-1"></i> Edit
-              </button>
-              <button onclick="handleDeleteProject('${pId}', '${pName.replace(/'/g, "\\'")}')" class="text-xs bg-slate-900 hover:bg-red-900/50 text-red-400 border border-slate-700 hover:border-red-500/50 px-2 py-1 rounded transition" title="Delete Project">
-                <i class="fa-solid fa-trash-can mr-1"></i> Delete
-              </button>
-            </div>
-            <p class="text-xs text-slate-400 num mt-1">ID: ${pId}</p>
-          </div>
+          <div><h2 class="text-xl font-bold text-white">${project.projectName}</h2><p class="text-xs text-slate-400 num">ID: ${project.projectId}</p></div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">Edit Start Date</label>
-            <input type="date" value="${pStart}" onchange="handleStartDateChange('${pId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white num">
+            <input type="date" value="${project.startDate}" onchange="handleStartDateChange('${project.projectId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white num">
           </div>
         </div>
         <div class="flex items-center gap-3">
           <div class="flex-1 bg-slate-950 rounded-full h-2 border border-slate-700 overflow-hidden"><div class="bg-gradient-to-r from-blue-600 to-blue-500 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div></div>
-          <span class="text-xs text-slate-300 num shrink-0">${completed}/${totalStages} · ${pct}%</span>
+          <span class="text-xs text-slate-300 num shrink-0">${completed}/${currentProjectStages.length} · ${pct}%</span>
         </div>
       `;
 
       const tbody = document.getElementById('stages-table-body');
-      tbody.innerHTML = Array.isArray(currentProjectStages) ? currentProjectStages.map((s, idx) => `
+      tbody.innerHTML = currentProjectStages.map((s, idx) => `
         <tr draggable="true" data-index="${idx}" class="draggable-row hover:bg-blue-600/10 transition">
           <td class="py-3 px-2 text-center text-slate-500"><i class="fa-solid fa-grip-vertical"></i></td>
           <td class="py-3 px-4 num text-xs text-slate-400">#${s.stageOrder}</td>
@@ -366,61 +389,9 @@
             <button onclick="handleDeleteStage(${s.id})" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash-can"></i></button>
           </td>
         </tr>
-      `).join('') : '';
+      `).join('');
 
       attachTableDragAndDrop();
-    }
-
-    // Action: Edit Project
-    async function handleEditProject(projectId, currentName) {
-      const newName = prompt('Edit project name:', currentName);
-      if (newName === null || newName.trim() === '' || newName.trim() === currentName) return;
-
-      showLoader();
-      try {
-        const res = await fetch('/api/projects', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ projectId, projectName: newName.trim() })
-        });
-
-        if (res.ok) {
-          showToast('Project updated!');
-          initApp();
-        } else {
-          const err = await res.json();
-          alert(`Error: ${err.error || 'Failed to update project'}`);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        hideLoader();
-      }
-    }
-
-    // Action: Delete Project with Confirmation Prompt
-    async function handleDeleteProject(projectId, projectName) {
-      const confirmed = confirm(`Are you sure you want to delete "${projectName}"?\n\nThis will permanently delete this project and all its stages.`);
-      if (!confirmed) return;
-
-      showLoader();
-      try {
-        const res = await fetch(`/api/projects?projectId=${projectId}`, {
-          method: 'DELETE'
-        });
-
-        if (res.ok) {
-          showToast('Project deleted!');
-          initApp();
-        } else {
-          const err = await res.json();
-          alert(`Error: ${err.error || 'Failed to delete project'}`);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        hideLoader();
-      }
     }
 
     function attachTableDragAndDrop() {
@@ -540,9 +511,9 @@
       const feed = await res.json();
       hideLoader();
 
-      const renderCards = (arr) => arr && arr.length ? arr.map(i => `
+      const renderCards = (arr) => arr.length ? arr.map(i => `
         <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 mb-2">
-          <span class="text-xs text-blue-400 block">${i.projectName || i.project_name}</span>
+          <span class="text-xs text-blue-400 block">${i.projectName}</span>
           <div class="flex justify-between items-center gap-2"><h4 class="font-bold text-sm text-white">${i.stageName}</h4><span class="text-xs num text-slate-400 shrink-0">${i.calculatedDueDate}</span></div>
           <button onclick="handleStageUpdate(${i.id}, true, '${i.remarks || ''}')" class="text-xs text-emerald-400 hover:underline mt-2">Mark Complete</button>
         </div>
@@ -578,7 +549,9 @@
       div.className = 'flex items-center space-x-2 draggable-item p-1 bg-slate-900/50 rounded border border-slate-800';
       div.draggable = true;
 
-      div.ondragstart = () => { dragSrcIndex = Array.from(container.children).indexOf(div); };
+      div.ondragstart = (e) => {
+        dragSrcIndex = Array.from(container.children).indexOf(div);
+      };
       div.ondragover = (e) => { e.preventDefault(); };
       div.ondrop = (e) => {
         e.preventDefault();
@@ -658,7 +631,7 @@
           </div>
           <div class="space-y-1">${p.stages.map(s => `
             <div class="flex justify-between gap-2 text-xs text-slate-300 bg-slate-800 p-2 rounded">
-              <span><span class="num text-slate-500">#${s.stageOrder}</span>${s.stageName}</span>
+              <span><span class="num text-slate-500">#${s.stageOrder}</span> ${s.stageName}</span>
               <span class="text-blue-300 num shrink-0">+${s.daysOffset}d</span>
             </div>
           `).join('')}</div>
