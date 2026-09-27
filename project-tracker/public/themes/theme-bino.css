@@ -1,60 +1,188 @@
 :root {
-  /* Brand Palette (Teal/Mint and Deep Navy accents from the dashboard theme) */
+  /* ---- Brand ---- */
   --brand-300: #5EEAD4;
   --brand-400: #2DD4BF;
   --brand-500: #14B8A6;
   --brand-600: #0D9488;
   --brand-700: #0F766E;
-  --brand-800: #1E293B;
-  --brand-900: #0F172A;
-  
-  /* Neutral Dashboard Light Mode Palette */
-  --slate-50:  #FFFFFF;
-  --slate-100: #F8FAFC;
-  --slate-200: #E2E8F0;
-  --slate-300: #CBD5E1;
-  --slate-400: #64748B; /* Clear secondary text */
-  --slate-500: #475569; 
-  --slate-600: #334155; /* Sharp body text */
-  --slate-700: #1E293B; /* Distinct borders */
-  --slate-800: #FFFFFF; /* White card containers */
-  --slate-900: #F1F5F9; /* Clean light background matching dashboard mockups */
-  --slate-950: #0F172A;
 
-  --bg-gradient-1: rgba(13, 148, 136, 0.12);
-  --bg-gradient-2: rgba(20, 184, 166, 0.05);
-  --logo-shadow-base: rgba(15, 23, 42, 0.25);
-  --logo-shadow-hover: rgba(13, 148, 136, 0.4);
-  --selection-bg: rgba(20, 184, 166, 0.2);
+  /* ---- Surfaces (renamed to say what they ARE, not a scale position) ---- */
+  --surface-page:   #F1F5F9;
+  --surface-card:   #FFFFFF;
+  --surface-sunken: #F8FAFC;
+  --surface-dark:   #1E293B;   /* header banner */
+  --border-subtle:  #E2E8F0;
+  --border-strong:  #CBD5E1;
+
+  /* ---- Text on light surfaces (ratio vs #FFFFFF) ---- */
+  --text-strong: #0F172A;  /* 17.9:1 — headings */
+  --text-body:   #334155;  /* 10.5:1 — paragraphs */
+  --text-muted:  #475569;  /*  7.6:1 — captions, labels */
+  --text-faint:  #64748B;  /*  4.8:1 — timestamps ONLY, never body */
+  --text-link:   #0F766E;  /*  5.5:1 — brand-600 is only 3.7:1, too weak for links */
+
+  /* ---- Text on the dark header (ratio vs #1E293B) ---- */
+  --on-dark-strong: #FFFFFF;  /* 14.2:1 */
+  --on-dark-muted:  #CBD5E1;  /*  9.6:1 — keeps hierarchy instead of flattening to white */
+  --on-dark-accent: #5EEAD4;  /*  9.6:1 — safe teal on dark */
+
+  /* ---- Type ---- */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --leading-tight: 1.25;
+  --leading-body:  1.65;
+  --measure: 68ch;
+
+  --selection-bg: rgba(20, 184, 166, 0.28);
 }
 
-/* Custom styling for the top header to match the dark dashboard banner */
+/* ---- Base rendering ---- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+  line-height: var(--leading-body);
+  color: var(--text-body);
+  background-color: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  color: var(--text-strong);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.015em;   /* large text needs tightening, small text does not */
+  text-wrap: balance;
+  font-weight: 650;
+}
+
+p, li {
+  max-width: var(--measure);  /* the single biggest readability win */
+  text-wrap: pretty;
+}
+
+small, .caption, .text-muted {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Uppercase labels need extra tracking or they turn into a wall */
+.label, .eyebrow, [class*="uppercase"] {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Dashboard numerics stop jittering between refreshes */
+.metric, .stat, td[data-numeric], .tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+a {
+  color: var(--text-link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+a:hover { color: var(--brand-700); }
+
+::selection {
+  background-color: var(--selection-bg);
+  color: var(--text-strong);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---- Dark header banner ---- */
+/* Prefer adding class="app-header" in the markup; the escaped Tailwind
+   selector is kept as a fallback so this drops in without edits. */
+.app-header,
 header.bg-slate-800\/90 {
-  background-color: #1E293B !important; /* Deep Dark Slate/Navy Header */
-  border-bottom-color: #334155 !important;
+  background-color: var(--surface-dark) !important;
+  border-bottom: 1px solid #334155 !important;
 }
 
-header h1, header p, header .text-slate-100, header .text-slate-400 {
-  color: #FFFFFF !important; /* Stark white text inside the dark header */
+.app-header h1,
+header.bg-slate-800\/90 h1 {
+  color: var(--on-dark-strong) !important;
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  letter-spacing: -0.01em;
+  font-weight: 650;
 }
 
-header .bg-slate-700 {
-  background-color: #475569 !important;
+/* Subtitle stays muted — this is what restores the hierarchy */
+.app-header p,
+.app-header .text-slate-400,
+header.bg-slate-800\/90 p,
+header.bg-slate-800\/90 .text-slate-400 {
+  color: var(--on-dark-muted) !important;
+  font-size: 0.8125rem;
+  line-height: 1.5;
 }
 
-header button {
+.app-header .text-slate-100,
+header.bg-slate-800\/90 .text-slate-100 {
+  color: var(--on-dark-strong) !important;
+}
+
+.app-header .accent,
+header.bg-slate-800\/90 .accent {
+  color: var(--on-dark-accent) !important;
+}
+
+.app-header .bg-slate-700,
+header.bg-slate-800\/90 .bg-slate-700 {
+  background-color: #334155 !important;   /* was #475569 — too close to button fill */
+}
+
+.app-header button,
+header.bg-slate-800\/90 button {
   background-color: #334155 !important;
-  border-color: #475569 !important;
-  color: #FFFFFF !important;
+  border: 1px solid #64748B !important;   /* 2.3:1 vs fill — visible edge */
+  color: var(--on-dark-strong) !important;
+  font-size: 0.8125rem;
+  font-weight: 550;
+  letter-spacing: 0.005em;
 }
 
+.app-header button:hover,
+header.bg-slate-800\/90 button:hover {
+  background-color: #475569 !important;
+  border-color: var(--brand-400) !important;
+}
+
+.app-header :focus-visible,
+header.bg-slate-800\/90 :focus-visible {
+  outline-color: var(--brand-300);   /* teal-600 is invisible on navy */
+}
+
+/* ---- Logo ---- */
 .theme-logo {
   background-image: url('https://kristujayanti.edu.in/Container-nav.png');
   background-size: contain;
   background-position: left center;
   background-repeat: no-repeat;
-  
   height: 60px;
-  width: 250px; 
+  width: 250px;
+  max-width: 100%;
+  aspect-ratio: 250 / 60;
   display: block;
+  text-indent: -9999px;   /* lets you put real text in the element as a fallback */
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .theme-logo { height: 40px; width: 165px; }
+  p, li { max-width: none; }
 }
