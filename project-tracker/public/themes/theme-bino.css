@@ -8,18 +8,18 @@
   --brand-800: #1E40AF;
   --brand-900: #1E3A8A;
   
-  /* Neutral Light Mode Palette (Clean Off-Whites & Slate Text) */
-  --slate-50:  #F8FAFC;
-  --slate-100: #F1F5F9;
+  /* Neutral Light Mode Palette */
+  --slate-50:  #FFFFFF;
+  --slate-100: #F8FAFC;
   --slate-200: #E2E8F0;
   --slate-300: #CBD5E1;
-  --slate-400: #94A3B8;
-  --slate-500: #64748B;
-  --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #FFFFFF;
-  --slate-900: #F0F4F8;
-  --slate-950: #E2E8F0;
+  --slate-400: #475569; 
+  --slate-500: #334155; 
+  --slate-600: #1E293B; 
+  --slate-700: #0F172A; 
+  --slate-800: #FFFFFF; /* Content cards remain white */
+  --slate-900: #F1F5F9; /* Page background */
+  --slate-950: #64748B;
 
   --bg-gradient-1: rgba(37, 99, 235, 0.12);
   --bg-gradient-2: rgba(59, 130, 246, 0.05);
@@ -28,9 +28,28 @@
   --selection-bg: rgba(59, 130, 246, 0.2);
 }
 
+/* Force the top navigation header to be a deep corporate blue with white text */
+header.bg-slate-800\/90 {
+  background-color: #1E3A8A !important; /* Deep Navy Blue */
+  border-bottom-color: #1D4ED8 !important;
+}
+
+header h1, header p, header .text-slate-100, header .text-slate-400 {
+  color: #FFFFFF !important; /* Ensures header text is stark white and readable */
+}
+
+header .bg-slate-700 {
+  background-color: #3B82F6 !important; /* Divider lines */
+}
+
+header button {
+  background-color: #1E40AF !important;
+  border-color: #3B82F6 !important;
+  color: #FFFFFF !important;
+}
+
 .theme-logo {
-  /* Change this to your local file name if hosting in the repo */
-  background-image: url('logo-kristu.png');
+  background-image: url('https://kristujayanti.edu.in/Container-nav.png');
   background-size: contain;
   background-position: left center;
   background-repeat: no-repeat;
