@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#680087">
   <title>Project Tracker · Invincible YOU</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23680087'/><path d='M8 22V10h3v12H8zm6.4 0V10h3.1l5 7.6V10H25v12h-3.1l-5-7.6V22h-2.5z' fill='%23fff'/></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23680087'/><path d='M8 22V10h3v12H8zm6.4 0V10h3.1l5 7.6V10H25v12h-3.1l-5-7.6V22h-2.5z' fill='%23fff'/></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -27,7 +29,7 @@
         extend: {
           colors: {
             slate: {
-              50:  '#FAF7FC', 100: '#F4EFF7', 200: '#E3D9EA', 300: '#C7B6D3',
+              50: '#FAF7FC', 100: '#F4EFF7', 200: '#E3D9EA', 300: '#C7B6D3',
               400: '#A18CB0', 500: '#7B6689', 600: '#4A3659', 700: '#382848',
               800: '#221533', 900: '#170D22', 950: '#0D0715'
             },
@@ -35,10 +37,10 @@
               300: '#E0B6F2', 400: '#C98BE4', 500: '#A040C4',
               600: '#680087', 700: '#811AA3', 800: '#4F0068', 900: '#36004A'
             },
-            red:     { 300: '#F5AEBC', 400: '#EE7F96', 500: '#D94363', 600: '#BE2E4D' },
-            amber:   { 300: '#F3CE8E', 400: '#E9AC55', 500: '#D6913A' },
+            red: { 300: '#F5AEBC', 400: '#EE7F96', 500: '#D94363', 600: '#BE2E4D' },
+            amber: { 300: '#F3CE8E', 400: '#E9AC55', 500: '#D6913A' },
             emerald: { 300: '#8FDFC2', 400: '#4FC79E', 500: '#2FAE85' },
-            yellow:  { 300: '#F5D98A' }
+            yellow: { 300: '#F5D98A' }
           }
         }
       }
@@ -64,10 +66,10 @@
             300: 'var(--brand-300)', 400: 'var(--brand-400)', 500: 'var(--brand-500)',
             600: 'var(--brand-600)', 700: 'var(--brand-700)', 800: 'var(--brand-800)', 900: 'var(--brand-900)'
           },
-          red:     { 300: '#F5AEBC', 400: '#EE7F96', 500: '#D94363', 600: '#BE2E4D' },
-          amber:   { 300: '#F3CE8E', 400: '#E9AC55', 500: '#D6913A' },
+          red: { 300: '#F5AEBC', 400: '#EE7F96', 500: '#D94363', 600: '#BE2E4D' },
+          amber: { 300: '#F3CE8E', 400: '#E9AC55', 500: '#D6913A' },
           emerald: { 300: '#8FDFC2', 400: '#4FC79E', 500: '#2FAE85' },
-          yellow:  { 300: '#F5D98A' }
+          yellow: { 300: '#F5D98A' }
         }
       }
     }
@@ -77,28 +79,29 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col relative">
 
   <!-- Loader Overlay -->
-  <div id="loader" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex-col items-center justify-center hidden">
+  <div id="loader"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex-col items-center justify-center hidden">
     <div class="w-12 h-12 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin mb-4"></div>
     <p class="text-sm font-medium text-slate-300">Hold on for a sec...</p>
   </div>
 
-  <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700 sticky top-0 z-40 shadow-lg shadow-blue-900/30">
+  <header
+    class="bg-slate-800/90 backdrop-blur border-b border-slate-700 sticky top-0 z-40 shadow-lg shadow-blue-900/30">
     <div class="h-[3px] w-full bg-gradient-to-r from-blue-600 via-blue-500 to-transparent"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 h-20">
-
-      <a href="https://invincibleyou.world/" target="_blank" rel="noopener"
-         class="flex items-center gap-4 min-w-0" title="invincibleyou.world">
+      <a href="#" class="flex items-center gap-4 min-w-0">
         <span class="logo-plate shrink-0">
           <div class="theme-logo" aria-label="Organization Logo"></div>
         </span>
-        <span class="hidden sm:block w-px h-10 bg-slate-700 shrink-0"></span>
+        <span class="hidden sm:block w-px h-10 bg-slate-300 shrink-0"></span>
         <span class="min-w-0 hidden sm:block">
-          <h1 class="font-semibold text-[15px] text-slate-100 tracking-tight truncate">Project Tracker</h1>
-          <p class="text-xs text-slate-400 truncate">Let's stay organised</p>
+          <h1 class="font-semibold text-[15px] text-slate-800 tracking-tight truncate">Project Tracker</h1>
+          <p class="text-xs text-slate-500 truncate">Let's stay organised</p>
         </span>
       </a>
 
-      <button onclick="initApp()" class="shrink-0 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-500 text-slate-200 px-3 py-2 rounded-lg transition">
+      <button onclick="initApp()"
+        class="shrink-0 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-500 text-slate-200 px-3 py-2 rounded-lg transition">
         <i class="fa-solid fa-rotate-right mr-1 text-blue-400"></i> Refresh Data
       </button>
     </div>
@@ -108,27 +111,35 @@
 
     <!-- Navigation Tabs -->
     <div class="border-b border-slate-700 mb-6 flex space-x-8 overflow-x-auto" id="app-tabs">
-      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-active py-3 px-1 text-sm text-slate-300 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+      <button onclick="switchTab('dashboard')" id="tab-dashboard"
+        class="tab-active py-3 px-1 text-sm text-slate-300 hover:text-white flex items-center space-x-2 whitespace-nowrap">
         <i class="fa-solid fa-chart-line"></i><span>Project Dashboard</span>
       </button>
-      <button onclick="switchTab('presets')" id="tab-presets" class="py-3 px-1 text-sm text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+      <button onclick="switchTab('presets')" id="tab-presets"
+        class="py-3 px-1 text-sm text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
         <i class="fa-solid fa-layer-group"></i><span>Preset Templates</span>
       </button>
-      <button onclick="switchTab('create')" id="tab-create" class="py-3 px-1 text-sm text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+      <button onclick="switchTab('create')" id="tab-create"
+        class="py-3 px-1 text-sm text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
         <i class="fa-solid fa-square-plus"></i><span>New Project</span>
       </button>
     </div>
 
     <!-- TAB 1: DASHBOARD -->
     <div id="content-dashboard" class="tab-content space-y-6">
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div
+        class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 w-full md:w-auto">
-          <button onclick="setDashboardView('project')" id="btn-view-project" class="px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow">Project-Wise</button>
-          <button onclick="setDashboardView('date')" id="btn-view-date" class="px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white">Date-Wise Agenda</button>
+          <button onclick="setDashboardView('project')" id="btn-view-project"
+            class="px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow">Project-Wise</button>
+          <button onclick="setDashboardView('date')" id="btn-view-date"
+            class="px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white">Date-Wise
+            Agenda</button>
         </div>
         <div id="project-filter-container" class="w-full md:w-auto flex items-center space-x-3">
           <label class="text-sm font-medium text-slate-300">Project:</label>
-          <select id="project-select" onchange="renderProjectDashboard()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none w-full md:w-64"></select>
+          <select id="project-select" onchange="renderProjectDashboard()"
+            class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none w-full md:w-64"></select>
         </div>
       </div>
 
@@ -138,11 +149,16 @@
         </div>
 
         <div id="add-stage-box" class="bg-slate-800 p-4 rounded-xl border border-slate-700 hidden">
-          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3"><i class="fa-solid fa-plus text-blue-400 mr-2"></i>Add Custom Stage to Project</h4>
+          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3"><i
+              class="fa-solid fa-plus text-blue-400 mr-2"></i>Add Custom Stage to Project</h4>
           <div class="flex flex-col sm:flex-row gap-3">
-            <input type="text" id="custom-stage-name" placeholder="Stage Name" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white">
-            <input type="date" id="custom-stage-date" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white">
-            <button onclick="handleAddCustomStage()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"><i class="fa-solid fa-plus mr-1"></i> Add Stage</button>
+            <input type="text" id="custom-stage-name" placeholder="Stage Name"
+              class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white">
+            <input type="date" id="custom-stage-date"
+              class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white">
+            <button onclick="handleAddCustomStage()"
+              class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition"><i
+                class="fa-solid fa-plus mr-1"></i> Add Stage</button>
           </div>
         </div>
 
@@ -170,15 +186,18 @@
       <div id="view-date-wise" class="hidden space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="bg-slate-800 rounded-xl border border-red-500/30 p-4 shadow-lg">
-            <h3 class="font-bold text-red-400 mb-4 pb-2 border-b border-red-500/20"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Overdue</h3>
+            <h3 class="font-bold text-red-400 mb-4 pb-2 border-b border-red-500/20"><i
+                class="fa-solid fa-triangle-exclamation mr-2"></i> Overdue</h3>
             <div id="feed-overdue" class="space-y-3"></div>
           </div>
           <div class="bg-slate-800 rounded-xl border border-amber-500/30 p-4 shadow-lg">
-            <h3 class="font-bold text-amber-400 mb-4 pb-2 border-b border-amber-500/20"><i class="fa-solid fa-clock mr-2"></i> Due Today</h3>
+            <h3 class="font-bold text-amber-400 mb-4 pb-2 border-b border-amber-500/20"><i
+                class="fa-solid fa-clock mr-2"></i> Due Today</h3>
             <div id="feed-today" class="space-y-3"></div>
           </div>
           <div class="bg-slate-800 rounded-xl border border-blue-500/30 p-4 shadow-lg">
-            <h3 class="font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/20"><i class="fa-solid fa-calendar-days mr-2"></i> Upcoming</h3>
+            <h3 class="font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/20"><i
+                class="fa-solid fa-calendar-days mr-2"></i> Upcoming</h3>
             <div id="feed-upcoming" class="space-y-3"></div>
           </div>
         </div>
@@ -189,20 +208,28 @@
     <div id="content-presets" class="tab-content hidden space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-md h-fit">
-          <h3 id="preset-form-title" class="text-lg font-semibold text-white mb-4"><i class="fa-solid fa-plus-circle text-blue-400 mr-2"></i> Create Stage Preset</h3>
+          <h3 id="preset-form-title" class="text-lg font-semibold text-white mb-4"><i
+              class="fa-solid fa-plus-circle text-blue-400 mr-2"></i> Create Stage Preset</h3>
           <form id="preset-form" onsubmit="handleSavePreset(event)" class="space-y-4">
             <input type="hidden" id="editing-preset-id" value="">
-            <input type="text" id="preset-name" required placeholder="Preset Name (e.g. Website Launch)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
+            <input type="text" id="preset-name" required placeholder="Preset Name (e.g. Website Launch)"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
             <div id="preset-stages-inputs" class="space-y-2"></div>
             <div class="flex justify-between items-center pt-2">
-              <button type="button" onclick="addStageInputRow()" class="text-xs text-blue-400 hover:text-blue-300 font-medium"><i class="fa-solid fa-plus mr-1"></i> Add Stage</button>
-              <button type="button" id="btn-cancel-preset-edit" onclick="resetPresetForm()" class="text-xs text-slate-400 hover:text-white hidden">Cancel Edit</button>
+              <button type="button" onclick="addStageInputRow()"
+                class="text-xs text-blue-400 hover:text-blue-300 font-medium"><i class="fa-solid fa-plus mr-1"></i> Add
+                Stage</button>
+              <button type="button" id="btn-cancel-preset-edit" onclick="resetPresetForm()"
+                class="text-xs text-slate-400 hover:text-white hidden">Cancel Edit</button>
             </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition shadow"><i class="fa-solid fa-floppy-disk mr-2"></i> Save Preset</button>
+            <button type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition shadow"><i
+                class="fa-solid fa-floppy-disk mr-2"></i> Save Preset</button>
           </form>
         </div>
         <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-md">
-          <h3 class="text-lg font-semibold text-white mb-4"><i class="fa-solid fa-database text-blue-400 mr-2"></i> Saved Presets</h3>
+          <h3 class="text-lg font-semibold text-white mb-4"><i class="fa-solid fa-database text-blue-400 mr-2"></i>
+            Saved Presets</h3>
           <div id="presets-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
       </div>
@@ -211,21 +238,29 @@
     <!-- TAB 3: CREATE PROJECT -->
     <div id="content-create" class="tab-content hidden space-y-6">
       <div class="max-w-2xl mx-auto bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-lg">
-        <h3 class="text-xl font-bold text-white mb-6"><i class="fa-solid fa-folder-plus text-blue-400 mr-2"></i> Create Live Project</h3>
+        <h3 class="text-xl font-bold text-white mb-6"><i class="fa-solid fa-folder-plus text-blue-400 mr-2"></i> Create
+          Live Project</h3>
         <form id="create-project-form" onsubmit="handleCreateProject(event)" class="space-y-5">
-          <input type="text" id="new-project-name" required placeholder="Project Name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
+          <input type="text" id="new-project-name" required placeholder="Project Name"
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="date" id="new-project-start" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
-            <select id="new-project-preset" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none"></select>
+            <input type="date" id="new-project-start" required
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none">
+            <select id="new-project-preset" required
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none"></select>
           </div>
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition shadow-lg"><i class="fa-solid fa-rocket mr-2"></i> Generate Live Project</button>
+          <button type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition shadow-lg"><i
+              class="fa-solid fa-rocket mr-2"></i> Generate Live Project</button>
         </form>
       </div>
     </div>
   </main>
 
-  <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50">
-    <i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i><span id="toast-msg" class="text-sm">Action completed</span>
+  <div id="toast"
+    class="fixed bottom-5 right-5 bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50">
+    <i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i><span id="toast-msg" class="text-sm">Action
+      completed</span>
   </div>
 
   <script>
@@ -266,7 +301,7 @@
       document.querySelectorAll('#app-tabs button').forEach(el => el.classList.remove('tab-active'));
       document.getElementById('content-' + tabKey).classList.remove('hidden');
       document.getElementById('tab-' + tabKey).classList.add('tab-active');
-      if(tabKey === 'dashboard') { initApp(); }
+      if (tabKey === 'dashboard') { initApp(); }
     }
 
     function setDashboardView(mode) {
@@ -278,7 +313,7 @@
       document.getElementById('btn-view-project').className = mode === 'project' ? 'px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow' : 'px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white';
       document.getElementById('btn-view-date').className = mode === 'date' ? 'px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow' : 'px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white';
 
-      if(mode === 'date') loadDateWiseFeed();
+      if (mode === 'date') loadDateWiseFeed();
       else renderProjectDashboard();
     }
 
@@ -299,7 +334,7 @@
         projSelect.innerHTML = globalProjects.length ? globalProjects.map(p => `<option value="${p.projectId}">${p.projectName}</option>`).join('') : '<option value="">No projects found</option>';
 
         hideLoader();
-        if(globalProjects.length > 0 && currentDashboardView === 'project') renderProjectDashboard();
+        if (globalProjects.length > 0 && currentDashboardView === 'project') renderProjectDashboard();
       } catch (err) {
         hideLoader();
         console.error(err);
@@ -454,7 +489,7 @@
       });
       hideLoader();
       showToast('Stage updated!');
-      if(currentDashboardView === 'project') renderProjectDashboard();
+      if (currentDashboardView === 'project') renderProjectDashboard();
       else loadDateWiseFeed();
     }
 
@@ -607,4 +642,5 @@
     window.onload = () => { addStageInputRow(); initApp(); };
   </script>
 </body>
+
 </html>
