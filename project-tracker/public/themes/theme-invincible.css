@@ -35,7 +35,7 @@
   background-position: left center;
   background-repeat: no-repeat;
   
-  height: 32px;
-  width: 220px; /* Adjust this if the logo gets cut off */
+  height: 50px;
+  width: 250px; /* Adjust this if the logo gets cut off */
   display: block;
 }
