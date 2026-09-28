@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 :root {
   /* Brand Palette (Replaces Tailwind 'blue') */
   --brand-300: #E0B6F2;
@@ -20,6 +22,19 @@
   --slate-800: #221533;
   --slate-900: #170D22;
   --slate-950: #0D0715;
+
+
+  /* ---- Branding ----------------------------------------------------
+     Read back by applyBranding() in index.html. CSS cannot set <title>
+     or the favicon directly, so these are declared here as the single
+     source of truth and applied to the document at load.
+     String values MUST be quoted. --brand-favicon must be a url().
+  ------------------------------------------------------------------ */
+  --brand-app-name:    "Mary's Project Tracker";
+  --brand-tagline:     "Mary Smitha Jacob";
+  --brand-doc-title:   "Project Tracker";
+  --brand-theme-color: #680087;
+  --brand-favicon:     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23680087'/><path d='M8 22V10h3v12H8zm6.4 0V10h3.1l5 7.6V10H25v12h-3.1l-5-7.6V22h-2.5z' fill='%23fff'/></svg>");
 
   /* Custom Gradient & Shadow Variables */
   --bg-gradient-1: rgba(104, 0, 135, 0.38);

@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 :root {
   /* Brand Palette (Replaces Tailwind 'blue') */
   --brand-300: #E0B6F2;
@@ -21,6 +23,19 @@
   --slate-900: #170D22;
   --slate-950: #0D0715;
 
+
+  /* ---- Branding ----------------------------------------------------
+     Read back by applyBranding() in index.html. CSS cannot set <title>
+     or the favicon directly, so these are declared here as the single
+     source of truth and applied to the document at load.
+     String values MUST be quoted. --brand-favicon must be a url().
+  ------------------------------------------------------------------ */
+  --brand-app-name:    "Bino's Project Tracker";
+  --brand-tagline:     "Bino Joseph";
+  --brand-doc-title:   "Project Tracker";
+  --brand-theme-color: #3B5BFD;
+  --brand-favicon:     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%233B5BFD'/><path d='M18 4l-8 13h5l-2 11 9-14h-5z' fill='%23FACC15'/></svg>");
+
   /* Custom Gradient & Shadow Variables */
   --bg-gradient-1: rgba(104, 0, 135, 0.38);
   --bg-gradient-2: rgba(160, 64, 196, 0.16);
@@ -35,7 +50,7 @@
   background-position: left center;
   background-repeat: no-repeat;
   
-  height: 60px;
-  width: 300px; /* Adjust this if the logo gets cut off */
+  height: 50px;
+  width: 250px; /* Adjust this if the logo gets cut off */
   display: block;
 }

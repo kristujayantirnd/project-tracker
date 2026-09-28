@@ -4,10 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#680087">
-  <title>Project Tracker · Invincible YOU</title>
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23680087'/><path d='M8 22V10h3v12H8zm6.4 0V10h3.1l5 7.6V10H25v12h-3.1l-5-7.6V22h-2.5z' fill='%23fff'/></svg>">
+  <!-- Title, favicon and theme colour are defined in the active theme
+       file as --brand-* custom properties and applied by applyBranding()
+       below. What's here is only the no-CSS / no-JS fallback. -->
+  <meta name="theme-color" id="brand-theme-color" content="#0F172A">
+  <title>Project Tracker</title>
+  <link rel="icon" id="brand-favicon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230F172A'/></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -50,6 +53,39 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="__THEME_FILE__">
+
+  <script>
+    /* Reads the --brand-* tokens out of the active theme file and applies
+       them to the document. Runs once here (the stylesheet above is
+       render-blocking, so the values resolve) and again at load, when the
+       header elements exist. Call it again after swapping stylesheets to
+       rebrand live. */
+    function applyBranding() {
+      const css = getComputedStyle(document.documentElement);
+      const token = (name) => css.getPropertyValue(name).trim();
+      const text = (name) => token(name).replace(/^["']|["']$/g, '').replace(/\\0*([0-9a-f]{2,6})\s?/gi,
+        (_, hex) => String.fromCodePoint(parseInt(hex, 16)));
+
+      const title = text('--brand-doc-title');
+      if (title) document.title = title;
+
+      const icon = token('--brand-favicon').replace(/^url\((['"]?)(.*)\1\)$/, '$2');
+      const iconEl = document.getElementById('brand-favicon');
+      if (icon && iconEl) iconEl.setAttribute('href', icon);
+
+      const themeColor = token('--brand-theme-color');
+      const themeEl = document.getElementById('brand-theme-color');
+      if (themeColor && themeEl) themeEl.setAttribute('content', themeColor);
+
+      document.querySelectorAll('[data-brand]').forEach(el => {
+        const value = text('--brand-' + el.dataset.brand);
+        if (value) el.textContent = value;
+      });
+    }
+
+    applyBranding();
+    document.addEventListener('DOMContentLoaded', applyBranding);
+  </script>
 </head>
 
 <script>
@@ -95,8 +131,9 @@
         </span>
         <span class="hidden sm:block w-px h-10 bg-slate-300 shrink-0"></span>
         <span class="min-w-0 hidden sm:block">
-          <h1 class="font-semibold text-[15px] text-slate-800 tracking-tight truncate">Project Tracker</h1>
-          <p class="text-xs text-slate-500 truncate">Let's stay organised</p>
+          <h1 data-brand="app-name" class="font-semibold text-[15px] text-white tracking-tight truncate">Project
+            Tracker</h1>
+          <p data-brand="tagline" class="text-xs text-slate-400 truncate">Let's stay organised</p>
         </span>
       </a>
 
