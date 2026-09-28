@@ -95,7 +95,7 @@
         </span>
         <span class="hidden sm:block w-px h-10 bg-slate-300 shrink-0"></span>
         <span class="min-w-0 hidden sm:block">
-          <h1 class="font-semibold text-[15px] text-white tracking-tight truncate">Project Tracker</h1>
+          <h1 class="font-semibold text-[15px] text-slate-800 tracking-tight truncate">Project Tracker</h1>
           <p class="text-xs text-slate-500 truncate">Let's stay organised</p>
         </span>
       </a>
@@ -131,19 +131,19 @@
         class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 w-full md:w-auto">
           <button onclick="setDashboardView('project')" id="btn-view-project"
-            class="px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow">Project-Wise</button>
+            class="px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white">Project-Wise</button>
           <button onclick="setDashboardView('date')" id="btn-view-date"
-            class="px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white">Date-Wise
+            class="px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow">Date-Wise
             Agenda</button>
         </div>
-        <div id="project-filter-container" class="w-full md:w-auto flex items-center space-x-3">
+        <div id="project-filter-container" class="w-full md:w-auto hidden items-center space-x-3">
           <label class="text-sm font-medium text-slate-300">Project:</label>
           <select id="project-select" onchange="renderProjectDashboard()"
             class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none w-full md:w-64"></select>
         </div>
       </div>
 
-      <div id="view-project-wise" class="space-y-6">
+      <div id="view-project-wise" class="hidden space-y-6">
         <div id="project-card-header" class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-md">
           <p class="text-slate-400 text-sm">Select a project to view details.</p>
         </div>
@@ -183,7 +183,7 @@
         </div>
       </div>
 
-      <div id="view-date-wise" class="hidden space-y-6">
+      <div id="view-date-wise" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="bg-slate-800 rounded-xl border border-red-500/30 p-4 shadow-lg">
             <h3 class="font-bold text-red-400 mb-4 pb-2 border-b border-red-500/20"><i
@@ -280,6 +280,55 @@
     </div>
   </div>
 
+  <!-- Edit stage dialog. Opened from an agenda card or a stage name. -->
+  <div id="stage-modal" data-modal
+    class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
+    <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+      role="dialog" aria-modal="true" aria-labelledby="stage-modal-title">
+      <form onsubmit="handleSaveStageEdit(event)">
+        <input type="hidden" id="stage-modal-id">
+        <div class="p-6 space-y-4">
+          <div>
+            <p id="stage-modal-project" class="text-xs text-blue-400 font-medium truncate"></p>
+            <h3 id="stage-modal-title" class="text-base font-semibold text-white mt-0.5">Edit stage</h3>
+          </div>
+          <div>
+            <label for="stage-modal-name" class="block text-xs text-slate-400 mb-1">Stage name</label>
+            <input type="text" id="stage-modal-name" required maxlength="200"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label for="stage-modal-date" class="block text-xs text-slate-400 mb-1">Due date</label>
+            <input type="date" id="stage-modal-date" required
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 num focus:outline-none focus:border-blue-500">
+            <p id="stage-modal-overdue" class="text-xs text-red-400 mt-1.5 hidden"></p>
+          </div>
+          <div>
+            <label for="stage-modal-remarks" class="block text-xs text-slate-400 mb-1">Remarks</label>
+            <textarea id="stage-modal-remarks" rows="3"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 resize-y"></textarea>
+          </div>
+          <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer w-fit">
+            <input type="checkbox" id="stage-modal-done" class="w-4 h-4 accent-blue-500 cursor-pointer">
+            Mark this stage as done
+          </label>
+        </div>
+        <div class="px-6 py-4 bg-slate-900/60 border-t border-slate-700 space-y-3">
+          <button type="button" onclick="openProjectFromStage()"
+            class="text-xs text-blue-300 hover:text-blue-200 font-medium transition">
+            <i class="fa-solid fa-arrow-up-right-from-square mr-1.5"></i>Open this project's full stage list
+          </button>
+          <div class="flex justify-end gap-2">
+            <button type="button" onclick="closeStageModal()"
+              class="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition">Cancel</button>
+            <button type="submit"
+              class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition">Save changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Edit project dialog -->
   <div id="edit-project-modal" data-modal
     class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
@@ -339,7 +388,7 @@
 
     let globalProjects = [];
     let globalPresets = [];
-    let currentDashboardView = 'project';
+    let currentDashboardView = 'date';
     let currentProjectStages = [];
     let stageDragIndex = null;
     let dragSrcIndex = null;
@@ -361,16 +410,26 @@
       if (tabKey === 'dashboard') { initApp(); }
     }
 
-    function setDashboardView(mode) {
-      currentDashboardView = mode;
+    /* Split in two: the chrome can be applied without triggering a fetch,
+       which is what page load needs (initApp does the fetching). */
+    function applyDashboardViewChrome(mode) {
       document.getElementById('view-project-wise').classList.toggle('hidden', mode !== 'project');
       document.getElementById('project-filter-container').classList.toggle('hidden', mode !== 'project');
+      document.getElementById('project-filter-container').classList.toggle('flex', mode === 'project');
       document.getElementById('view-date-wise').classList.toggle('hidden', mode === 'project');
 
-      document.getElementById('btn-view-project').className = mode === 'project' ? 'px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow' : 'px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white';
-      document.getElementById('btn-view-date').className = mode === 'date' ? 'px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow' : 'px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white';
+      const on = 'px-4 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white shadow';
+      const off = 'px-4 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white';
+      document.getElementById('btn-view-project').className = mode === 'project' ? on : off;
+      document.getElementById('btn-view-date').className = mode === 'date' ? on : off;
+    }
+
+    function setDashboardView(mode) {
+      currentDashboardView = mode;
+      applyDashboardViewChrome(mode);
 
       if (mode === 'date') loadDateWiseFeed();
+      else if (globalProjects.length === 0) clearProjectView();
       else renderProjectDashboard();
     }
 
@@ -391,8 +450,9 @@
         projSelect.innerHTML = globalProjects.length ? globalProjects.map(p => `<option value="${p.projectId}">${escapeHtml(p.projectName)}</option>`).join('') : '<option value="">No projects found</option>';
 
         hideLoader();
-        if (globalProjects.length === 0) clearProjectView();
-        else if (currentDashboardView === 'project') renderProjectDashboard();
+        if (currentDashboardView === 'date') await loadDateWiseFeed();
+        else if (globalProjects.length === 0) clearProjectView();
+        else renderProjectDashboard();
       } catch (err) {
         hideLoader();
         console.error(err);
@@ -452,7 +512,10 @@
           <td class="py-3 px-2 text-center text-slate-500"><i class="fa-solid fa-grip-vertical"></i></td>
           <td class="py-3 px-4 num text-xs text-slate-400">#${s.stageOrder}</td>
           <td class="py-3 px-4">${s.isCompleted ? '<span class="text-emerald-400 text-xs font-bold">Done</span>' : '<span class="text-slate-400 text-xs font-bold">Pending</span>'}</td>
-          <td class="py-3 px-4 font-semibold text-white">${s.stageName}</td>
+          <td class="py-3 px-4 font-semibold text-white">
+            <button type="button" onclick="openStageModal(${s.id})" title="Edit this stage"
+              class="text-left hover:text-blue-300 hover:underline decoration-dotted underline-offset-4 transition break-words">${escapeHtml(s.stageName)}</button>
+          </td>
           <td class="py-3 px-4 num text-xs text-slate-300">
             <input type="date" value="${s.calculatedDueDate}" onchange="handleCustomStageDateChange(${s.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white num">
           </td>
@@ -588,15 +651,39 @@
 
     async function loadDateWiseFeed() {
       showLoader();
-      const res = await fetch('/api/stages?feed=true');
-      const feed = await res.json();
-      hideLoader();
+      let feed = { overdue: [], dueToday: [], upcoming: [] };
+      try {
+        const res = await fetch('/api/stages?feed=true');
+        if (!res.ok) throw new Error(`Feed failed (${res.status})`);
+        feed = await res.json();
+      } catch (err) {
+        console.error(err);
+        showToast('Could not load the agenda: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+
+      /* Cache the feed rows by id so the modal can open from an id alone.
+         Passing names through inline onclick strings used to break on any
+         apostrophe — "O'Brien review" silently killed the handler. */
+      feedStageIndex = {};
+      [...feed.overdue, ...feed.dueToday, ...feed.upcoming].forEach(i => {
+        feedStageIndex[i.id] = { ...i, isCompleted: false };
+      });
 
       const renderCards = (arr) => arr.length ? arr.map(i => `
-        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 mb-2">
-          <span class="text-xs text-blue-400 block">${i.projectName}</span>
-          <div class="flex justify-between items-center gap-2"><h4 class="font-bold text-sm text-white">${i.stageName}</h4><span class="text-xs num text-slate-400 shrink-0">${i.calculatedDueDate}</span></div>
-          <button onclick="handleStageUpdate(${i.id}, true, '${i.remarks || ''}')" class="text-xs text-emerald-400 hover:underline mt-2">Mark Complete</button>
+        <div role="button" tabindex="0" title="Click to edit this stage"
+          onclick="openStageModal(${i.id})"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStageModal(${i.id});}"
+          class="bg-slate-900 p-3 rounded-lg border border-slate-700 mb-2 cursor-pointer transition hover:border-blue-500 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <span class="text-xs text-blue-400 block truncate">${escapeHtml(i.projectName)}</span>
+          <div class="flex justify-between items-start gap-2">
+            <h4 class="font-bold text-sm text-white break-words">${escapeHtml(i.stageName)}</h4>
+            <span class="text-xs num text-slate-400 shrink-0 mt-0.5">${i.calculatedDueDate}</span>
+          </div>
+          ${i.remarks ? `<p class="text-xs text-slate-400 mt-1 break-words">${escapeHtml(i.remarks)}</p>` : ''}
+          <button type="button" onclick="event.stopPropagation(); handleQuickComplete(${i.id})"
+            class="text-xs text-emerald-400 hover:underline mt-2">Mark Complete</button>
         </div>
       `).join('') : '<p class="text-xs text-slate-500">Nothing here.</p>';
 
@@ -857,12 +944,129 @@
       }
     }
 
+    /* ------------------------------------------------------------------
+       Stage editor — opened from an agenda card or a stage name
+    ------------------------------------------------------------------ */
+
+    let feedStageIndex = {};
+    let stageModalProjectId = null;
+
+    function findStage(id) {
+      return feedStageIndex[id] || currentProjectStages.find(s => s.id === id) || null;
+    }
+
+    function todayStr() {
+      const d = new Date();
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+    }
+
+    function openStageModal(id) {
+      const stage = findStage(id);
+      if (!stage) return;
+
+      stageModalProjectId = stage.projectId;
+      const project = globalProjects.find(p => p.projectId === stage.projectId);
+
+      document.getElementById('stage-modal-id').value = stage.id;
+      document.getElementById('stage-modal-project').textContent =
+        stage.projectName || (project ? project.projectName : '');
+      document.getElementById('stage-modal-name').value = stage.stageName || '';
+      document.getElementById('stage-modal-date').value = stage.calculatedDueDate || '';
+      document.getElementById('stage-modal-remarks').value = stage.remarks || '';
+      document.getElementById('stage-modal-done').checked = !!stage.isCompleted;
+
+      const note = document.getElementById('stage-modal-overdue');
+      const today = todayStr();
+      if (!stage.isCompleted && stage.calculatedDueDate && stage.calculatedDueDate < today) {
+        const days = Math.round((Date.parse(today) - Date.parse(stage.calculatedDueDate)) / 86400000);
+        note.textContent = `Overdue by ${days} day${days === 1 ? '' : 's'}.`;
+        note.classList.remove('hidden');
+      } else {
+        note.classList.add('hidden');
+      }
+
+      document.getElementById('stage-modal').classList.replace('hidden', 'flex');
+      document.getElementById('stage-modal-name').focus();
+    }
+
+    function closeStageModal() {
+      document.getElementById('stage-modal').classList.replace('flex', 'hidden');
+    }
+
+    async function handleSaveStageEdit(e) {
+      e.preventDefault();
+      const id = Number(document.getElementById('stage-modal-id').value);
+      const stageName = document.getElementById('stage-modal-name').value.trim();
+      const calculatedDueDate = document.getElementById('stage-modal-date').value;
+      const remarks = document.getElementById('stage-modal-remarks').value;
+      const isCompleted = document.getElementById('stage-modal-done').checked;
+      if (!stageName || !calculatedDueDate) return;
+
+      closeStageModal();
+      showLoader();
+      try {
+        const res = await fetch('/api/stages', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, stageName, calculatedDueDate, remarks, isCompleted })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `Save failed (${res.status})`);
+        }
+        showToast('Stage updated');
+        if (currentDashboardView === 'date') await loadDateWiseFeed();
+        else await renderProjectDashboard();
+      } catch (err) {
+        console.error(err);
+        showToast('Could not save: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    /* Jumps from the agenda straight into the full stage list for the
+       project this stage belongs to. */
+    function openProjectFromStage() {
+      const projectId = stageModalProjectId;
+      closeStageModal();
+      if (!projectId) return;
+
+      const select = document.getElementById('project-select');
+      if (!Array.from(select.options).some(o => o.value === projectId)) {
+        showToast('That project is no longer in the list');
+        return;
+      }
+      select.value = projectId;
+      setDashboardView('project');
+    }
+
+    async function handleQuickComplete(id) {
+      showLoader();
+      try {
+        const res = await fetch('/api/stages', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, isCompleted: true })
+        });
+        if (!res.ok) throw new Error(`Update failed (${res.status})`);
+        showToast('Stage marked complete');
+        await loadDateWiseFeed();
+      } catch (err) {
+        console.error(err);
+        showToast('Could not update: ' + err.message);
+      } finally {
+        hideLoader();
+      }
+    }
+
     /* Escape closes whichever dialog is open; clicking the backdrop
        (but not the panel) does the same. */
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
       closeConfirm(false);
       closeEditProject();
+      closeStageModal();
     });
 
     document.getElementById('confirm-cancel').addEventListener('click', () => closeConfirm(false));
@@ -872,11 +1076,16 @@
       modal.addEventListener('mousedown', (e) => {
         if (e.target !== modal) return;
         if (modal.id === 'confirm-modal') closeConfirm(false);
-        else closeEditProject();
+        else if (modal.id === 'edit-project-modal') closeEditProject();
+        else if (modal.id === 'stage-modal') closeStageModal();
       });
     });
 
-    window.onload = () => { addStageInputRow(); initApp(); };
+    window.onload = () => {
+      addStageInputRow();
+      applyDashboardViewChrome(currentDashboardView);
+      initApp();
+    };
   </script>
 </body>
 

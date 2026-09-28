@@ -57,20 +57,55 @@ export default async function handler(req, res) {
       })));
     }
 
+    /* PUT - updates any combination of the four editable fields.
+       Anything the caller omits is left alone, via COALESCE, so this
+       stays compatible with the old call shapes: a date-only PUT no
+       longer wipes remarks, and a remarks+done PUT no longer has to
+       resend the due date. One statement, so it is atomic. */
     if (req.method === 'PUT') {
       let body = req.body;
       if (typeof body === 'string') {
         try { body = JSON.parse(body); } catch(e) {}
       }
 
-      const { id, isCompleted, remarks, calculatedDueDate } = body || {};
+      const { id, isCompleted, remarks, calculatedDueDate, stageName } = body || {};
 
-      if (calculatedDueDate !== undefined) {
-        await sql`UPDATE project_stages SET calculated_due_date = ${calculatedDueDate} WHERE id = ${id}`;
-      } else {
-        await sql`UPDATE project_stages SET is_completed = ${isCompleted}, remarks = ${remarks} WHERE id = ${id}`;
+      if (id === undefined || id === null) {
+        return res.status(400).json({ error: 'id is required' });
       }
-      return res.status(200).json({ success: true });
+
+      const name = typeof stageName === 'string' ? stageName.trim() : undefined;
+      if (name !== undefined && !name) {
+        return res.status(400).json({ error: 'Stage name cannot be empty' });
+      }
+
+      const updated = await sql`
+        UPDATE project_stages SET
+          stage_name          = COALESCE(${name ?? null}::text, stage_name),
+          calculated_due_date = COALESCE(${calculatedDueDate ?? null}::date, calculated_due_date),
+          is_completed        = COALESCE(${isCompleted ?? null}::boolean, is_completed),
+          remarks             = COALESCE(${remarks ?? null}::text, remarks)
+        WHERE id = ${id}
+        RETURNING *
+      `;
+
+      if (updated.length === 0) {
+        return res.status(404).json({ error: 'Stage not found' });
+      }
+
+      const s = updated[0];
+      return res.status(200).json({
+        success: true,
+        stage: {
+          id: s.id,
+          projectId: s.project_id,
+          stageName: s.stage_name,
+          stageOrder: s.stage_order,
+          calculatedDueDate: new Date(s.calculated_due_date).toISOString().split('T')[0],
+          isCompleted: s.is_completed,
+          remarks: s.remarks
+        }
+      });
     }
 
     if (req.method === 'POST') {
