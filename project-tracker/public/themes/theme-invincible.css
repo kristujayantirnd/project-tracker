@@ -30,7 +30,7 @@
      source of truth and applied to the document at load.
      String values MUST be quoted. --brand-favicon must be a url().
   ------------------------------------------------------------------ */
-  --brand-app-name:    "Mary's Project Tracker";
+  --brand-app-name:    "Project Tracker";
   --brand-tagline:     "Mary Smitha Jacob";
   --brand-doc-title:   "Project Tracker";
   --brand-theme-color: #680087;
